@@ -23,7 +23,17 @@ int main(int argc, char *argv[])
 
   long n_comp = NULL;
 
-  Array_Shellsort(array, size, &n_comp)
+  Array_Shellsort(array, size, &n_comp);
+
+  int writ = 0;
+  
+  writ = Array_Save_To_File(argv[2],array,size);
+
+  if(writ != size)
+  {
+    fprintf(stderr, "written != size of array")
+    return 0;
+  }
 
   
 }

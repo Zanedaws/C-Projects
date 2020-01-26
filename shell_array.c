@@ -20,7 +20,7 @@ long *Array_Load_From_File(char *filename, int *size)
   rewind(fh);
 
   //allocate array space
-  arr = malloc(size);
+  arr = malloc(sizeof(long) * (*size));
 
   //read the file
   ver = fread(arr, sizeof(long), (*size), fh);
