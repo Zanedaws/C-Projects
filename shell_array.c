@@ -24,16 +24,16 @@ long *Array_Load_From_File(char *filename, int *size)
 
   //read the file
   ver = fread(arr, sizeof(long), (*size), fh);
-    if(ver != size
-    {
+  if(ver != size
+  {
     fclose(fh);
     free(arr);
     return NULL;
-    }
+  }
 
-    //close file and return
-    fclose(fh)
-    return arr;
+  //close file and return
+  fclose(fh);
+  return arr;
 }
 
 int Array_Save_To_File(char *filename, long *array, int size)
