@@ -48,6 +48,9 @@ int Array_Save_To_File(char *filename, long *array, int size)
         return 0;
     }
 
-    fwrite()
-}
+    numWrit = fwrite(arr, sizeof(long), size, fh);
 
+    fclose(fh)
+    free(array)
+    return numWrit;
+}
