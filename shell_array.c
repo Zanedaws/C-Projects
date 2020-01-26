@@ -38,18 +38,31 @@ long *Array_Load_From_File(char *filename, int *size)
 
 int Array_Save_To_File(char *filename, long *array, int size)
 {
+  //open file
   fh = fopen(filename, 'w');
 
+  //check if file opened successfully
   if (size == NULL || size == 0)
   {
     fclose(fh);
-    free(array) return 0;
+    free(array); 
+    return 0;
   }
 
+  //number of written items
+  int numWrit;
+
+  //write to file
   numWrit = fwrite(arr, sizeof(long), size, fh);
 
-  fclose(fh)
-    free(array) return numWrit;
+  //close file
+  fclose(fh);
+
+  //free array
+  free(array);
+
+  //return number of written values
+  return numWrit;
 }
 
 void Array_Shellsort(long *array, int size, long *n_comp)
