@@ -93,7 +93,7 @@ void Array_Shellsort(long *array, int size, long *n_comp)
   // h = (h - 1) / 3
 
 
-  //shell sort
+  //shell sort --------------------------------------------------
   while (h > 0)
   {
     for (j = h; j < size; j++)
@@ -110,6 +110,7 @@ void Array_Shellsort(long *array, int size, long *n_comp)
     //decrement sequence
     h = (h - 1) / 3;
   }
+  //shell sort --------------------------------------------------
 
   return;
 }
