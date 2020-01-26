@@ -54,11 +54,18 @@ int Array_Save_To_File(char *filename, long *array, int size)
 
 void Array_Shellsort(long *array, int size, long *n_comp)
 {
+  //sequence value
   int h = 1;
+
+  //indexing values
   int i = 0;
   int j = 0;
+
+  //temp variables
   long tmp = 0;
 
+
+  //getting max sequence value
   do
   {
 
@@ -72,11 +79,24 @@ void Array_Shellsort(long *array, int size, long *n_comp)
   // }
   // h = (h - 1) / 3
 
+
+  //shell sort
   while (h > 0)
   {
     for (j = h; j < size; j++)
     {
-      tmp =
+      tmp = array[j];
+      i = j
+      while (i >= h && r[i-h] > tmp)
+      {
+        r[i] = r[i-h];
+        i = i - h;
+        r[i] = tmp;
+      }
     }
+    //decrement sequence
+    h = (h - 1) / 3;
   }
+
+  return;
 }
