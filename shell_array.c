@@ -39,6 +39,15 @@ long *Array_Load_From_File(char* filename, int *size)
 
 int Array_Save_To_File(char *filename, long *array, int size)
 {
-    
+    fh = fopen(filename, 'w');
+
+    if(size == 0)
+    {
+        fclose(fh);
+        free(array)
+        return 0;
+    }
+
+    fwrite()
 }
 
