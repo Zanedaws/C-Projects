@@ -20,7 +20,7 @@ long *Array_Load_From_File(char *filename, int *size)
   rewind(fh);
 
   //allocate array space
-  arr = malloc(size);
+  arr = malloc(sizeof(long) * (*size));
 
   //read the file
   ver = fread(arr, sizeof(long), (*size), fh);
@@ -102,10 +102,12 @@ void Array_Shellsort(long *array, int size, long *n_comp)
       i = j
       while (i >= h && r[i-h] > tmp)
       {
+        *n_comp++;
         r[i] = r[i-h];
         i = i - h;
         r[i] = tmp;
       }
+      *n_comp++;
     }
     //decrement sequence
     h = (h - 1) / 3;
