@@ -68,7 +68,7 @@ int Array_Save_To_File(char *filename, long *array, int size)
 void Array_Shellsort(long *array, int size, long *n_comp)
 {
   //sequence value
-  int h = 1;
+  int h = 0;
 
   //indexing values
   int i = 0;
