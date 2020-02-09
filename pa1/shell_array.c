@@ -1,5 +1,6 @@
 #include "shell_array.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 long *Array_Load_From_File(char *filename, int *size)
 {
@@ -7,7 +8,7 @@ long *Array_Load_From_File(char *filename, int *size)
   long *arr = NULL;
 
   //open file
-  FILE *fh = open(filename, 'r');
+  FILE *fh = fopen(filename, "r");
   if (fh == NULL)
   {
     fclose(fh);
@@ -23,8 +24,9 @@ long *Array_Load_From_File(char *filename, int *size)
   arr = malloc(sizeof(long) * (*size));
 
   //read the file
+  int ver;
   ver = fread(arr, sizeof(long), (*size), fh);
-  if(ver != size
+  if(ver != *size)
   {
     fclose(fh);
     free(arr);
@@ -39,10 +41,11 @@ long *Array_Load_From_File(char *filename, int *size)
 int Array_Save_To_File(char *filename, long *array, int size)
 {
   //open file
-  fh = fopen(filename, 'w');
+  FILE * fh;
+  fh = fopen(filename, "w");
 
   //check if file opened successfully
-  if (size == NULL || size == 0)
+  if (size == 0)
   {
     fclose(fh);
     free(array); 
@@ -53,7 +56,7 @@ int Array_Save_To_File(char *filename, long *array, int size)
   int numWrit;
 
   //write to file
-  numWrit = fwrite(arr, sizeof(long), size, fh);
+  numWrit = fwrite(array, sizeof(long), size, fh);
 
   //close file
   fclose(fh);
@@ -99,13 +102,13 @@ void Array_Shellsort(long *array, int size, long *n_comp)
     for (j = h; j < size; j++)
     {
       tmp = array[j];
-      i = j
-      while (i >= h && r[i-h] > tmp)
+      i = j;
+      while (i >= h && array[i-h] > tmp)
       {
-        *n_comp++;
-        r[i] = r[i-h];
+        (*n_comp)++;
+        array[i] = array[i-h];
         i = i - h;
-        r[i] = tmp;
+        array[i] = tmp;
       }
       *n_comp++;
     }

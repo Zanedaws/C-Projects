@@ -10,18 +10,21 @@ int main(int argc, char *argv[])
     return 0;
   }
 
-  int size = NULL;
+  int size = 0;
 
   long* array = NULL;
   array = Array_Load_From_File(argv[1], &size);
   
+  #ifdef DDEBUG
   if(array == NULL)
   {
     fprintf(stderr,"loading failed");
+    free(array);
     return 0;
   }
+  #endif
 
-  long n_comp = NULL;
+  long n_comp = 0;
 
   Array_Shellsort(array, size, &n_comp);
 
@@ -31,9 +34,11 @@ int main(int argc, char *argv[])
 
   if(writ != size)
   {
-    fprintf(stderr, "written != size of array")
+    fprintf(stderr, "written != size of array");
     return 0;
   }
+
+  printf("%ld\n",n_comp);
 
   return 0;
 }
