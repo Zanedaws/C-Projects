@@ -4,9 +4,7 @@
 
 long *Array_Load_From_File(char *filename, int *size)
 {
-  //init array
-  long *arr = NULL;
-
+  
   //open file
   FILE *fh = fopen(filename, "r");
   if (fh == NULL)
@@ -21,15 +19,18 @@ long *Array_Load_From_File(char *filename, int *size)
   rewind(fh);
 
   //allocate array space
+  long* arr = NULL;
   arr = malloc(sizeof(long) * (*size));
 
   //read the file
   int ver;
   ver = fread(arr, sizeof(long), (*size), fh);
+
   if(ver != *size)
   {
     fclose(fh);
     free(arr);
+    exit(EXIT_FAILURE);
     return NULL;
   }
 
@@ -38,11 +39,12 @@ long *Array_Load_From_File(char *filename, int *size)
   return arr;
 }
 
-int Array_Save_To_File(char *filename, long *array, int size)
+int Array_Save_To_File(char *filename, long *array, int size) 
 {
   //open file
-  FILE * fh;
-  fh = fopen(filename, "w");
+  FILE * fh = NULL;
+
+  fh = fopen(filename, "wb");
 
   //check if file opened successfully
   if (size == 0)
@@ -88,12 +90,7 @@ void Array_Shellsort(long *array, int size, long *n_comp)
     h = 3 * h + 1;
 
   } while (h < size);
-
-  // while(h < size)
-  // {
-  //     h = 3 * h + 1;
-  // }
-  // h = (h - 1) / 3
+  h = (h - 1) / 3;
 
 
   //shell sort --------------------------------------------------
@@ -110,7 +107,7 @@ void Array_Shellsort(long *array, int size, long *n_comp)
         i = i - h;
         array[i] = tmp;
       }
-      *n_comp++;
+      (*n_comp)++;
     }
     //decrement sequence
     h = (h - 1) / 3;
