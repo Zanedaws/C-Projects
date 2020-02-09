@@ -26,3 +26,6 @@ clean: # remove all machine generated files
 	
 zip:
 	zip ~/Coding/ECE264/solutions/ECEhomework/zips/pa1.zip pa1.c shell_array.c
+
+update:
+	git push -u https://Zanedaws:40002608Zanefunk@github.com/Zanedaws/ECE368.git master
