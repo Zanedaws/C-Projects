@@ -1,6 +1,7 @@
 #include "shell_array.h"
 #include "shell_array.c"
 #include <stdio.h>
+#include <string.h>
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +14,7 @@ int main(int argc, char *argv[])
   int size = 0;
 
   long* array = NULL;
-  array = Array_Load_From_File(argv[1], &size);
+  array = Array_Load_From_File(argv[2], &size);
   
   #ifdef DDEBUG
   if(array == NULL)
@@ -26,11 +27,12 @@ int main(int argc, char *argv[])
 
   long n_comp = 0;
 
-  Array_Shellsort(array, size, &n_comp);
+  if(strncmp(argv[1],"-a", 2))
+    Array_Shellsort(array, size, &n_comp);
 
   int writ = 0;
   
-  writ = Array_Save_To_File(argv[2],array,size);
+  writ = Array_Save_To_File(argv[3],array,size);
 
   if(writ != size)
   {
