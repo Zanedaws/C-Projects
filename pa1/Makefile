@@ -22,7 +22,7 @@ test1: pa1
 	./pa1 -a examples/15.b output1
 	
 clean: # remove all machine generated files
-	rm -f shuffle *.o output?
+	rm -f *.o output?
 	
 zip:
 	zip ~/Coding/ECE264/solutions/ECEhomework/zips/pa1.zip pa1.c shell_array.c
