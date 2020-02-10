@@ -13,6 +13,7 @@ Node *addNode(Node* head, long val)
     newNode = malloc(sizeof(Node));
     newNode -> value = val;
     newNode -> next = NULL;
+    // printf("newNode -> value = %ld\n", newNode -> value);
 
     //checks if head is null
     if(head == NULL)
@@ -30,36 +31,39 @@ Node *addNode(Node* head, long val)
         p -> next = newNode;
         return head;
     }
+
 }
 
 Node* destroyList(Node* head)
 {
     Node* p = NULL;
     p = head;
-    while(p -> next -> next != NULL)
-    {
-        p = p -> next;
-    }
     
-    free(p -> next);
+    Node * next = NULL;
 
-    if(head -> next != NULL)
-        destroyList(head);
-    else
+    while(p != NULL)
     {
-        free(head);
-        return NULL;
+        next = p -> next;
+        free(p);
+        p = next;
     }
+
+    head = NULL;
+    return head;
 }
 
 Node* getIminH(Node* head, int i, int h)
 {
     Node* p = NULL;
     p = head;
+    int count = 0;
 
-    while(count != (i - h))
+    while(count != (i - h - 1))
+    {
         p = p -> next;
-    
+        count++;
+    }
+
     return p;
 }
 
@@ -77,12 +81,21 @@ Node *List_Load_From_File(char *filename)
     Node *head = NULL; //initializing the head of the list
 
     long tmp; //tmp for reading into
+    int read = 0;
 
     while(!feof(fh))
     {
-        fread(&tmp, sizeof(long), 1, fh); //read a value into tmp
+        read += fread(&tmp, sizeof(long), 1, fh); //read a value into tmp
         if(!feof(fh)) //check if EOF has been reached
             head = addNode(head, tmp); //add value to list
+    }
+
+    if(read == 0)
+    {
+        fprintf(stderr, "read failed");
+        exit(EXIT_FAILURE);
+        destroyList(head);
+        return NULL;
     }
 
     fclose(fh); //close the file
@@ -90,31 +103,30 @@ Node *List_Load_From_File(char *filename)
     return head; //return the new head of the list
 }
 
-int List_save_To_File(char* filename, Node* list)
+int List_Save_To_File(char* filename, Node* list)
 {
-    //open file
-    FILE* fh = fopen(filename, "w");
+    FILE *fh = NULL;
+    fh = fopen(filename, "w");
+
+
     if(fh == NULL)
     {
-        fprintf(stderr,"output file failed to open");
-        list = destroyList(list);
-        return -1;
+        exit(EXIT_FAILURE);
+        return 0;
     }
+    
 
-    int count = 0; //written counter
-    Node* p = NULL; //pointer for printing
-    p = list; //initialize pointer at beginning of list
+    Node *p = list;
+    int written;
 
-    //loop through list and write each value
     while(p != NULL)
     {
-        fwrite(p -> value, sizeof(long), 1, fh);
-        count++;
+        fwrite(&(p -> value), sizeof(long), 1, fh);
         p = p -> next;
+        written++;
     }
 
-    list = destroyList(list); //destroy the list
-    return count; //return the count
+    return written;
 }
 
 Node *List_Shellsort(Node *list, long *n_comp)
@@ -141,47 +153,63 @@ Node *List_Shellsort(Node *list, long *n_comp)
     } while (h < size);
     h = (h - 1) / 3;
 
+    //increment variables
     int j;
     int i;
-    int count;
+    int k = 0;
+
+    //
     Node* nodeCmp = NULL;
-    Node* tmp = NULL;
+    Node* tmp = list;
 
     //shell sort --------------------------------------------------
     while (h > 0)
     {
         for (j = h; j < size; j++)
         {
-            // tmp = array[j];
-            p = list;
-            while(count != j && p != NULL)
+            while(k < j)
             {
-                p = p -> next;
-                count++;
+                tmp = tmp -> next;
+                k++;
             }
+            k = 0;
+            //tmp -> next is array[j]
             i = j;
-            while (i >= h && getIminH(list, i, h) -> value > p -> value)
+            nodeCmp = list;
+            while(k < (i - h))
             {
-                nodeCmp = getIminH(list, i, h); //get the node at position i - h
-                (*n_comp)++; //increment comparison count
+                nodeCmp = nodeCmp -> next;
+                k++;
+            }
+            k = 0;
 
-                //swap adresses of nodes
-                tmp = p -> next;
-                p -> next = nodeCmp;
-                tmp -> next = nodeCmp -> next;
-                nodeCmp -> next = tmp; 
-
-
-                // array[i] = array[i-h];
-
-                //decrement i by h and then find new array[i]
-                i = i - h;
+            
+            while (i >= h && nodeCmp -> next -> value > tmp -> next -> value)
+            {
+                
+                (*n_comp)++;
                 p = list;
-                while(count != i && p != NULL)
+                while(k < i)
                 {
                     p = p -> next;
-                    count++;
+                    k++;
                 }
+                k = 0;
+                //p -> next is array[i]
+                i = i - h;
+
+                nodeCmp = list;
+                while(k < i)
+                {
+                    nodeCmp = nodeCmp -> next;
+                    k++;
+                }
+                k = 0;
+                //nodeCmp -> next is array[i - h]
+
+                p -> next = nodeCmp -> next;
+                nodeCmp -> next = tmp;
+                
             }
             (*n_comp)++; //increment number of comparisons
         }
@@ -189,5 +217,9 @@ Node *List_Shellsort(Node *list, long *n_comp)
         h = (h - 1) / 3;
     }
     //shell sort --------------------------------------------------
+
+    printf("reached\n");
+
+    return list;
 
 }

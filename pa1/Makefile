@@ -5,7 +5,7 @@ VAL = valgrind --tool=memcheck --leak-check=full --verbose --show-leak-kinds=all
 
 TESTFLAGS = 
 
-SRCS = pa1.c shell_array.c #shell_list.c
+SRCS = pa1.c shell_array.c shell_list.c
 OBJS = $(SRCS:%.c=%.o)
 
 pa1: $(OBJS)
@@ -15,7 +15,7 @@ pa1: $(OBJS)
 	$(GCC) $(TESTFLAGS) -c $*.c
 
 testmemory: pa1
-	$(VAL) --log-file=memcheck1.txt ./pa1 -a examples/15.b  output1
+	$(VAL) --log-file=memcheck1.txt ./pa1 -l examples/15.b  output1
 	code memcheck1.txt
 
 test1: pa1
