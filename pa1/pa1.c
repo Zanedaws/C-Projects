@@ -22,20 +22,27 @@ int main(int argc, char *argv[])
   if(!strcmp(argv[1],"-a"))
   {
     Array_Shellsort(array, size, &n_comp);
+
+
+    int writ = 0;
+
+    writ = Array_Save_To_File(argv[3],array,size);
+
+    if(writ != size)
+    {
+      fprintf(stderr, "written != size of array");
+      return 0;
+    }
+
+    printf("%ld\n",n_comp);
   }
 
 
-  int writ = 0;
-
-  writ = Array_Save_To_File(argv[3],array,size);
-
-  if(writ != size)
+  if(!strcmp(argv[1], "-l"))
   {
-    fprintf(stderr, "written != size of array");
-    return 0;
+    
   }
 
-  printf("%ld\n",n_comp);
 
   return 0;
 }
