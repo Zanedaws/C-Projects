@@ -3,8 +3,7 @@
 #include <stdio.h>
 Node* addNode(Node* head, long val);
 Node* destroyList(Node* head);
-Node* getIminH(Node* head, int i, int h);
-
+Node* swapNodes(Node* head, Node* n1, Node* n2);
 
 Node *addNode(Node* head, long val)
 {
@@ -52,21 +51,55 @@ Node* destroyList(Node* head)
     return head;
 }
 
-Node* getIminH(Node* head, int i, int h)
+
+Node* swapNodes(Node* head, Node* n1, Node* n2)
 {
-    Node* p = NULL;
-    p = head;
-    int count = 0;
+    Node * p = head;
+    Node * q = head;
+    
+    fprintf(stderr, "head = %ld\n", head -> value);
+    fprintf(stderr, "n1 = %ld\n", n1 -> value);
+    fprintf(stderr, "n2 = %ld\n", n2 -> value);
 
-    while(count != (i - h - 1))
+    fprintf(stderr, "n1 == head: %d\n", n1 == head);
+
+    if(n1 != head)
     {
-        p = p -> next;
-        count++;
+        //p finds previous of n1
+        while(p -> next != n1)
+        {
+            p = p -> next;
+        }
+
+        if(n2 != head)
+        {
+            //q finds previous of n2
+            while(q -> next != n2)
+            {
+                q = q -> next;
+            }
+
+            Node * tmp = n1 -> next;
+            n1 -> next = n2 -> next;
+            n2 -> next = tmp;
+            p -> next = n2;
+            q -> next = n1;
+            return head;
+        }
+        else if (n2 == head)
+        {
+            Node * tmp = n1 -> next;
+            n1 -> next = n2 -> next;
+            n2 -> next = tmp;
+            p -> next = n2;
+            head = n1;
+            return head;
+        }
+        
     }
-
-    return p;
+    
+    return head;
 }
-
 
 Node *List_Load_From_File(char *filename)
 {
@@ -74,7 +107,7 @@ Node *List_Load_From_File(char *filename)
     FILE *fh = fopen(filename, "r");
     if(fh == NULL)
     {
-        fprintf(stderr, "file didn't load properly");
+        fprintf(stderr, "%s", "file didn't load properly\n");
         return NULL;
     }
 
@@ -92,7 +125,7 @@ Node *List_Load_From_File(char *filename)
 
     if(read == 0)
     {
-        fprintf(stderr, "read failed");
+        fprintf(stderr,"%s","read failed");
         exit(EXIT_FAILURE);
         destroyList(head);
         return NULL;
@@ -111,6 +144,7 @@ int List_Save_To_File(char* filename, Node* list)
 
     if(fh == NULL)
     {
+        fprintf(stderr,"%s", "fopen in save failed");
         exit(EXIT_FAILURE);
         return 0;
     }
@@ -134,7 +168,7 @@ Node *List_Shellsort(Node *list, long *n_comp)
 
     //counting the size of the list
     Node* p = list;
-    int size = 0;
+    long size = 0;
 
     while(p -> next != NULL)
     {
@@ -142,7 +176,7 @@ Node *List_Shellsort(Node *list, long *n_comp)
         size++;
     }
 
-    int h = 0; //sequence value
+    long h = 0; //sequence value
 
     //getting max sequence value
     do
@@ -154,61 +188,85 @@ Node *List_Shellsort(Node *list, long *n_comp)
     h = (h - 1) / 3;
 
     //increment variables
-    int j;
-    int i;
-    int k = 0;
+    long j;
+    long i;
+    long k = 0;
 
     //
-    Node* nodeCmp = NULL;
-    Node* tmp = list;
+    Node* arrIminH = list;
+    Node* tmp = NULL;
+    Node* arrI = list;
 
     //shell sort --------------------------------------------------
     while (h > 0)
     {
         for (j = h; j < size; j++)
         {
-            while(k < j)
+            tmp = list;
+            while(k != j)
             {
                 tmp = tmp -> next;
                 k++;
             }
             k = 0;
-            //tmp -> next is array[j]
+
             i = j;
-            nodeCmp = list;
-            while(k < (i - h))
+            
+            arrIminH = list;
+            while(k != i - h)
             {
-                nodeCmp = nodeCmp -> next;
-                k++;
+                arrIminH = arrIminH -> next;
+                k++; 
             }
             k = 0;
 
-            
-            while (i >= h && nodeCmp -> next -> value > tmp -> next -> value)
+            while (i >= h && arrIminH -> value > tmp -> value)
             {
-                
                 (*n_comp)++;
-                p = list;
-                while(k < i)
+
+                arrIminH = list;
+                while(k != i - h)
                 {
-                    p = p -> next;
+                    arrIminH = arrIminH -> next;
+                    k++; 
+                }
+                k = 0;
+
+                arrI = list;
+
+                while(k != i)
+                {
+                    arrI = arrI -> next;
                     k++;
                 }
                 k = 0;
-                //p -> next is array[i]
+
+                fprintf(stderr, "here\n");
+
+                Node * preArrI = list;
+                while(preArrI != arrI && preArrI -> next != arrI);
+                    preArrI = preArrI -> next;
+
+                fprintf(stderr, "here\n");
+
+                Node * preArrIH = list;
+                while(preArrIH != arrIminH && preArrIH -> next != arrIminH)
+                    preArrIH = preArrIH -> next;
+
+                Node* pstArrI = arrI -> next;
+
+                arrI -> next = arrIminH -> next;
+                preArrI -> next = arrIminH;
+                arrIminH -> next = pstArrI;
+                preArrIH -> next = arrI;
+
                 i = i - h;
 
-                nodeCmp = list;
-                while(k < i)
-                {
-                    nodeCmp = nodeCmp -> next;
-                    k++;
-                }
-                k = 0;
-                //nodeCmp -> next is array[i - h]
+                arrI -> next = arrIminH -> next;
+                preArrI -> next = arrIminH;
+                arrIminH -> next = pstArrI;
+                preArrIH -> next = arrI;
 
-                p -> next = nodeCmp -> next;
-                nodeCmp -> next = tmp;
                 
             }
             (*n_comp)++; //increment number of comparisons
@@ -217,8 +275,6 @@ Node *List_Shellsort(Node *list, long *n_comp)
         h = (h - 1) / 3;
     }
     //shell sort --------------------------------------------------
-
-    printf("reached\n");
 
     return list;
 

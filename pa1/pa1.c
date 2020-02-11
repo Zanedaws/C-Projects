@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
   int i = 0;
   for(i = 0; i < argc; i++)
   {
-    printf("argv[%d] = %s\n", i, argv[i]);
+    fprintf(stderr, "argv[%d] = %s\n", i, argv[i]);
   }
 
   if(!strcmp(argv[1],"-a"))
@@ -66,15 +66,20 @@ int main(int argc, char *argv[])
 
     head = List_Shellsort(head, &n_comp);
 
-    printf("reached\n");
+    fprintf(stderr, "%s", "past shell sort\n");
 
     int writ;
+
+    int k = 0;
+    Node* q = head;
+    fprintf(stderr, "%ld\n", q -> value);
+    q = q -> next;
+    fprintf(stderr, "%ld\n", q -> value);
 
     writ = List_Save_To_File(argv[3], head);
 
     if(writ != size)
     {
-      printf("reached");
       fprintf(stderr,"writ != size");
       exit(EXIT_FAILURE);
       return 0;
