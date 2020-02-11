@@ -260,14 +260,26 @@ Node *List_Shellsort(Node *list, long *n_comp)
                 arrIminH -> next = pstArrI;
                 preArrIH -> next = arrI;
 
+                fprintf(stderr, "here\n");
+
                 i = i - h;
 
-                arrI -> next = arrIminH -> next;
-                preArrI -> next = arrIminH;
-                arrIminH -> next = pstArrI;
-                preArrIH -> next = arrI;
 
-                
+                preArrI = list;
+                while(preArrI != arrI && preArrI -> next != arrI);
+                    preArrI = preArrI -> next;
+
+                preArrIH = list;
+                while(preArrIH != tmp && preArrIH -> next != tmp)
+                    preArrIH = preArrIH -> next;
+
+                pstArrI = arrI -> next;
+
+                arrI -> next = tmp -> next;
+                preArrI -> next = tmp;
+                tmp -> next = pstArrI;
+                preArrIH -> next = arrI;
+            
             }
             (*n_comp)++; //increment number of comparisons
         }

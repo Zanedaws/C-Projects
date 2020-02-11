@@ -19,8 +19,8 @@ testmemory: pa1
 	code memcheck1.txt
 
 test1: pa1
-	./pa1 -a examples/15.b output1a
-	diff output1a examples/15sa.b
+	./pa1 -a examples/1K.b output1a
+	diff output1a examples/1Ksa.b
 
 test2: pa1
 	./pa1 -l examples/15.b output1l
