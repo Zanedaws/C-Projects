@@ -13,7 +13,7 @@ typedef struct list{ //linked list to store frequency
 
 
 //list functions ------------------------------------------------
-list* readFromFile(char* filename);
+list* readFromFile(char* filename, list* header);
 list* addListNode(list* head, char chr, long freq);
 list* destroyList(list* head);
 void freqOutput(char* filename, list* head);
@@ -23,5 +23,5 @@ void freqOutput(char* filename, list* head);
 Tree* buildTree(Tree * root, list * head);
 void preTravHead(char* filename, Tree * root);
 list* preTravCode(char* filename, Tree* root);
-void codeMessage(char* inputFile, char* filename, Tree* root);
+void codeMessage(char* inputFile, char* filename, list* header);
 //---------------------------------------------------------------
