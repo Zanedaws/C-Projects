@@ -67,3 +67,21 @@ list* addListNode(list* head, char letter)
         return head;
     }
 }
+
+list* destroyList(list* head)
+{
+
+    if(head == NULL)
+        return head;
+
+    list* p = head;
+    while(p -> next != NULL)
+    {
+        p = p -> next;
+    }
+
+    free(p);
+
+    destroyList(head);
+}
+
