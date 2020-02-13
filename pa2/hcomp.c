@@ -28,3 +28,42 @@ list* readFromFIle(char* filename, list* head)
 
     return head;
 }
+
+
+list* addListNode(list* head, char letter)
+{
+    if(head == NULL)
+    {
+        list* node = malloc(sizeof(*node));
+        node -> chr = letter;
+        node -> code = NULL;
+        node -> freq = 1;
+        node -> next = NULL;
+        head = node;
+        return head;
+    }
+
+    list* p = head;
+
+    while(letter != p -> chr && p -> next != NULL)
+    {
+        p = p -> next;
+    }
+
+    if(letter == p -> chr)
+    {
+        p -> freq += 1;
+        return head;
+    }
+
+    if(p -> next == NULL)
+    {
+        list* node = malloc(sizeof(*node));
+        node -> chr = letter;
+        node -> code = NULL;
+        node -> freq = 1;
+        node -> next = NULL;
+        p -> next = node;
+        return head;
+    }
+}

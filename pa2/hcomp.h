@@ -14,7 +14,7 @@ typedef struct list{ //linked list to store frequency
 
 //list functions ------------------------------------------------
 list* readFromFile(char* filename, list* head);
-list* addListNode(list* head, char chr);
+list* addListNode(list* head, char letter);
 list* destroyList(list* head);
 void freqOutput(char* filename, list* head);
 //---------------------------------------------------------------
