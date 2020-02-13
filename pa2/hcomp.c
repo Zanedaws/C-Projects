@@ -85,3 +85,16 @@ list* destroyList(list* head)
     destroyList(head);
 }
 
+void freqOutput(char* filename, list* head)
+{
+    FILE* fh = fopen(filename, "wb");
+    list* p = head;
+
+    while(p != NULL)
+    {
+        fwrite(&(p -> freq), sizeof(long), 1, fh);
+        p = p -> next;
+    }
+
+    return;
+}
