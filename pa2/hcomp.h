@@ -17,6 +17,7 @@ list* readFromFile(char* filename, list* head);
 list* addListNode(list* head, char letter);
 list* destroyList(list* head);
 void freqOutput(char* filename, list* head);
+// list* sortList(list* head);
 //---------------------------------------------------------------
 
 //HTree functions -----------------------------------------------
