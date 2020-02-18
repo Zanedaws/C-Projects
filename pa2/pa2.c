@@ -12,18 +12,20 @@ int main(int argc, char** argv)
     }
 
     Tree** forest = malloc(sizeof(*forest) * STARTSIZE);
-    int sizeE;
+    int count = 0;
 
-    sizeE = readFromFile(argv[1], forest);
+    forest = readFromFile(argv[1], forest, &count);
 
     int writCheck;
 
-    writCheck = freqOutput(argv[2], forest, sizeE);
+    writCheck = freqOutput(argv[2], forest, count);
     if(writCheck != EXIT_SUCCESS)
     {
         fprintf(stderr, "err in freqOutput.\n");
         return EXIT_FAILURE;
     }
+
+    forest = destroyForest(forest, count);
 
     return EXIT_SUCCESS;
 }

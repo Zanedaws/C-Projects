@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #define ZERO 0
 
-int readFromFIle(char* filename, Tree** forest)
+Tree** readFromFile(char* filename, Tree** forest, int* count)
 {
     FILE * fh = fopen(filename, "rb");
 
@@ -15,7 +15,6 @@ int readFromFIle(char* filename, Tree** forest)
     }
 
     char tmp;
-    int count = 0;
     int size = STARTSIZE;
 
     while(!feof(fh))
@@ -23,21 +22,28 @@ int readFromFIle(char* filename, Tree** forest)
         tmp = fgetc(fh);
         if(!feof(fh))
         {
-            size = addTree(forest, tmp, &count, size);
+            forest = addTree(forest, tmp, count, &size);
+            
         }
     }
 
     fclose(fh);
 
-    sortForest(forest, count);
+    sortForest(forest, *count);
 
-    return count;
+    return forest;
 }
 
 
 
-int addTree(Tree** forest, char tmp, int* count, int size)
+Tree** addTree(Tree** forest, char tmp, int* count, int* size)
 {
+    Tree* newTree = malloc(sizeof(*newTree));
+    newTree ->  chr = tmp;
+    newTree -> freq = 1;
+    newTree -> left = NULL;
+    newTree -> right = NULL;
+
     int i;
     //check if character is already in forest
     for(i = 0; i < *count; i++)
@@ -45,33 +51,50 @@ int addTree(Tree** forest, char tmp, int* count, int size)
         if(forest[i] -> chr == tmp)
         {
             forest[i] -> freq += 1;
-            return size;
+            free(newTree);
+            return forest;
         }
     }
 
 
     //if it isn't then check if the array is big enough, if not increase the size
-    if(*count != 0 && *count - 1 < size)
+    if(*count != 0 && *count < *size)
     {
-        forest[*count - 1] -> chr = tmp;
-        forest[*count - 1] -> freq = 1;
+        forest[*count] = newTree;
+        forest[*count] = newTree;
+        *count += 1;
+        return forest;
     }
     else if(*count == 0)
     {
-        forest[*count] -> chr = tmp;
-        forest[*count] -> freq = 1;
-        *count++;
+        forest[*count] = newTree;
+        forest[*count] = newTree;
+        *count += 1;
+        return forest;
     }
     else
     {
-        forest = realloc(forest, sizeof(*forest) * (*count + size/4));
-        size = *count + size/4;
-        forest[*count - 1] -> chr = tmp;
-        forest[*count - 1] -> freq = 1;
-        *count++;
+        Tree** newForest = realloc(forest, sizeof(*forest) * (*size + *size/4));
+        *size = *size + *size/4;
+        newForest[*count] = newTree;
+        newForest[*count] = newTree;
+        *count += 1;
+        return newForest;
     }
 
-    return size;
+    return forest;
+}
+
+Tree** destroyForest(Tree** forest, int count)
+{
+    int i;
+    for(i = 0; i < count; i++)
+    {
+        free(forest[i]);
+    }
+    free(forest);
+    forest = NULL;
+    return forest;
 }
 
 
@@ -123,7 +146,7 @@ void sortForest(Tree** forest, int size)
 
     //temp variables
     long tmp = 0;
-
+    char tmp2 = '\0';
 
     //getting max sequence value
     do
@@ -141,12 +164,15 @@ void sortForest(Tree** forest, int size)
         for (j = h; j < size; j++)
         {
             tmp = forest[j] -> freq;
+            tmp2 = forest[j] -> chr;
             i = j;
             while (i >= h && forest[i-h] -> freq > tmp)
             {
                 forest[i] -> freq = forest[i-h] -> freq;
+                forest[i] -> chr = forest[i-h] -> chr;
                 i = i - h;
                 forest[i] -> freq = tmp;
+                forest[i] -> chr = tmp2;
             }
         }
         //decrement sequence
@@ -159,6 +185,16 @@ void sortForest(Tree** forest, int size)
 
 int freqOutput(char* filename, Tree** forest, int size)
 {
+
+    // //checking frequencies------------------------------------------------------------
+    // int k;
+    // for(k = 0; k < size; k++)
+    // {
+    //     fprintf(stderr, "%c -> freq: %ld\n", forest[k] -> chr, forest[k] -> freq);
+    // }
+    // //--------------------------------------------------------------------------------
+
+
     FILE* fh = fopen(filename, "w");
     
     if(fh == NULL)
@@ -171,33 +207,37 @@ int freqOutput(char* filename, Tree** forest, int size)
     int written;
     int i;
     int j;
+    char current;
     long zero = ZERO;
     for(i = 0; i < 256; i++)
     {
-        for(j = 0;j < size; j++)
+        current = i;
+        for(j = 0; j < size; j++)
         {
-            if(forest[j] -> chr == (char)i)
+            if(forest[j] -> chr == current)
             {
                 written = fwrite(&(forest[j] -> freq), sizeof(long), 1, fh);
                 if(written != 1)
                 {
-                    fprintf(stderr, "failed to write a freq.\n");
+                    fprintf(stderr, "error occurred when writing a frequency\n");
                     fclose(fh);
                     return EXIT_FAILURE;
                 }
             }
         }
-        if(j != size - 1)
+        if(written == 0)
         {
             written = fwrite(&(zero), sizeof(long), 1, fh);
             if(written != 1)
             {
-                fprintf(stderr, "failed to write a ZERO freq.\n");
+                fprintf(stderr, "error occurred when writing a zero\n");
                 fclose(fh);
                 return EXIT_FAILURE;
             }
         }
+        written = 0;
     }
 
+    fclose(fh);
     return EXIT_SUCCESS;
 }

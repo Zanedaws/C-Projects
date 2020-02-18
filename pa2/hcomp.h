@@ -1,4 +1,5 @@
 #define STARTSIZE 4
+#define GROWFACTOR 1.5
 
 typedef struct HTree{ //huffman tree
     char chr; //character for the node on the tree
@@ -7,8 +8,10 @@ typedef struct HTree{ //huffman tree
     struct HTree * right; //right pointer
 } Tree;
 
-int readFromFile(char* filename, Tree** forest);
-int addTree(Tree** forest, char tmp, int* count, int size);
+Tree** readFromFile(char* filename, Tree** forest, int* size);
+Tree** addTree(Tree** forest, char tmp, int* count, int* size);
+Tree** destroyForest(Tree** forest, int count);
+// Tree** moreMem(Tree** forest, int* size /*number of mem spaces in array*/, int* count /*number of spaces used*/);
 int freqOutput(char* filename, Tree** forest, int size);
 void sortForest(Tree** forest, int size);
 Tree* buildTree(Tree** forest, int size);
