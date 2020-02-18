@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#define ZERO 0
 
-list* readFromFIle(char* filename, list* head)
+int readFromFIle(char* filename, Tree** forest)
 {
     FILE * fh = fopen(filename, "rb");
 
@@ -14,256 +15,169 @@ list* readFromFIle(char* filename, list* head)
     }
 
     char tmp = NULL;
+    int count = 0;
 
     while(!feof(fh))
     {
         tmp = fgetc(fh);
         if(!feof(fh))
         {
-            head = addListNode(head, tmp);
+            count = addTree(forest, tmp, count);
         }
     }
 
     fclose(fh);
 
-    return head;
+    sortForest(forest, count);
+
+    return count;
 }
 
 
-list* addListNode(list* head, char letter)
+
+int addTree(Tree** forest, char tmp, int* count)
 {
-    if(head == NULL)
+    int sizeE = sizeof(forest)/sizeof(*forest);
+
+    count++;
+
+    int i;
+    //check if character is already in forest
+    for(i = 0; i < count; i++)
     {
-        list* node = malloc(sizeof(*node));
-        node -> chr = letter;
-        node -> code = NULL;
-        node -> freq = 1;
-        node -> next = NULL;
-        head = node;
-        return head;
+        if(forest[i] -> chr == tmp)
+        {
+            forest[i] -> freq += 1;
+            return count;
+        }
     }
 
-    list* p = head;
 
-    while(letter != p -> chr && p -> next != NULL)
+    //if it isn't then check if the array is big enough, if not increase the size
+    if(count - 1 < sizeE)
     {
-        p = p -> next;
+        forest[count - 1] -> chr = tmp;
+        forest[count - 1] -> freq = 1;
+    }
+    else
+    {
+        forest = realloc(forest, sizeof(*forest) * (sizeE + sizeE/4));
+        forest[count - 1] -> chr = tmp;
+        forest[count - 1] -> freq = 1;
     }
 
-    if(letter == p -> chr)
-    {
-        p -> freq += 1;
-        return head;
-    }
-
-    if(p -> next == NULL)
-    {
-        list* node = malloc(sizeof(*node));
-        node -> chr = letter;
-        node -> code = NULL;
-        node -> freq = 1;
-        node -> next = NULL;
-        p -> next = node;
-        return head;
-    }
+    return count;
 }
 
-list* destroyList(list* head)
+
+Tree* buildTree(Tree** forest, int size)
 {
+    Tree* root = malloc(sizeof(*root));
+    root -> left = NULL;
+    root -> right = NULL;
+    root -> chr = NULL;
+    root -> freq = 0;
 
-    if(head == NULL)
-        return head;
 
-    list* p = head;
-    while(p -> next != NULL)
+    if(size > 1)
     {
-        p = p -> next;
+        Tree* root = malloc(sizeof(*root));
+        root -> left = forest[0];
+        root -> right = forest[1];
+        root -> freq = forest[0] -> freq + forest[1] -> freq;
+
+        Tree** newForest = malloc(sizeof(Tree*) * size - 1);
+        int i;
+        int j = 0;
+        for(i = 0; i < size - 1, i++)
+        {
+            if(j < size && forest[j] -> freq < root -> freq)
+            {
+                newForest[i] = forest[j];
+                j++;
+            }
+            else
+            {
+                newForest[i] = root;
+            }
+        }
+
+        root = buildTree(newForest, size - 1);
+        return root;
     }
-
-    free(p);
-
-    destroyList(head);
+    return root;
 }
 
-void freqOutput(char* filename, list* head)
+void sortForest(Tree** forest, int size)
 {
-    FILE* fh = fopen(filename, "wb");
-    list* p = head;
+    //sequence value
+    long h = 0;
 
-    while(p != NULL)
+    //indexing values
+    long i = 0;
+    long j = 0;
+
+    //temp variables
+    long tmp = 0;
+
+
+    //getting max sequence value
+    do
     {
-        fwrite(&(p -> freq), sizeof(long), 1, fh);
-        p = p -> next;
+
+        h = 3 * h + 1;
+
+    } while (h < size);
+    h = (h - 1) / 3;
+    
+
+    //shell sort --------------------------------------------------
+    while (h > 0)
+    {
+        for (j = h; j < size; j++)
+        {
+            tmp = forest[j] -> freq;
+            i = j;
+            while (i >= h && forest[i-h] -> freq > tmp)
+            {
+                forest[i] -> freq = forest[i-h] -> freq;
+                i = i - h;
+                array[i] -> freq = tmp;
+            }
+        }
+        //decrement sequence
+        h = (h - 1) / 3;
     }
+    //shell sort --------------------------------------------------
 
     return;
 }
 
-// list* sortList(list* head)
-// {
-//     list* p = head;
-//     long tmp = 0;
-//     int h = 0;
-//     int size = 0;
-
-//     while(p -> next != NULL)
-//     {
-//         size++;
-//         p = p -> next;
-//     }
-
-//     p = head;
-
-//     do
-//     {
-//         h = 3 * h + 1;
-//     }while(h < size);
-//     if(size != h)
-//         h = (h-1) / 3;
-
-//     //indexing variables
-//     int j = 0;
-//     int i = 0;
-//     int c = 0; //counts where in the list we are
-
-//     long tmp = 0; //tmp variable for swapping purposes
-
-//     list* arrJ = NULL; //array[j]
-//     list* arrIH = NULL; //array[i - h]
-//     list* arrI = NULL; //array[i]
-//     list* parrI = NULL; //array[i - 1]
-//     list* psarrIH = NULL; //array[i - h + 1]
-//     list* parrIH = NULL; //array[i - h - 1]
-
-//     while(h > 0)
-//     {
-//         for(j = h; j < size; j++)
-//         {
-//             //find the location of arr[j]
-//             while(c != j)
-//             {
-//                 p = p -> next;
-//             }
-//             arrJ = p; //assign arrJ to be a pointer to list index j
-//             p = head; //reset the p pointer to head
-//             c = 0; //reset the counter variable
-
-//             i = j; //set i index starting point
-
-
-//             //find the location of arr[i - h]
-//             while(c != i - h)
-//             {
-//                 p = p -> next;
-//             }
-//             arrIH = p; //assign arrIH to be a pointer to list index i - h
-//             p = head; //reset the p pointer to head
-//             c = 0; //reset the counter variable
-
-//             while(i >= h && arrIH -> freq > tmp -> freq)
-//             {
-//                 //find the location of arr[i]
-//                 while(c != i)
-//                 {
-//                     p = p -> next;
-//                 }
-//                 arrI = p; //assign arrI to be a pointer to list index i
-//                 p = head; //reset the p pointer to head
-//                 c = 0; //reset the counter variable
-
-//                 if(arrIH == head)
-//                 {
-//                     if(arrI != head -> next)
-//                     {    
-//                         //get the position before the index i in the list
-//                         while(p -> next != arrI)
-//                         {
-//                             p = p -> next;
-//                         }
-//                         parrI = p;
-//                         p = head;
-//                     }
-//                     else
-//                         parrI = NULL;
-
-//                     //check if a post index i - h is needed
-//                     if(parrI == NULL && parrI != arrIH -> next)
-//                         psarrIH = arrIH -> next;
-//                     else
-//                         psarrIH = NULL;
-
-//                     //swapping addresses
-//                     if(arrI != head -> next)
-//                         parrI -> next = arrIH;   
-//                     arrIH -> next = arrI -> next;
-//                     if(psarrIH == NULL)
-//                         if(arrI != head -> next)
-//                             arrI -> next = parrI;
-//                         else
-//                             arrI -> next = arrIH;
-//                     else
-//                         arrI -> next = psarrIH;
-//                     head = arrI;
-//                 }
-
-//                 if(arrIH != head)
-//                 {
-//                     //get list node before array[i]
-//                     if(arrI != arrIH -> next)
-//                     {
-//                         while(p -> next != arrI)
-//                         {
-//                             p = p -> next;
-//                         }
-//                         parrI = p;
-//                         p = head;
-//                     }
-
-//                     //get list node before array[i - h]
-//                     if(arrIH != head -> next)
-//                     {
-//                         while(p -> next != arrIH)
-//                         {
-//                             p = p -> next;
-//                         }
-//                         parrIH = p;
-//                         p = head;
-//                     }
-//                     else
-//                         parrIH = head;
-
-//                     if(arrIH -> next != arrI)
-//                         psarrIH = arrIH -> next;
-
-//                     parrIH -> next = arrI;
-//                     arrIH -> next = arrI -> next;
-//                     if(psarrIH != NULL)
-
-                    
-
-//                 }
-
-//             }
-//         }
-//     }
-
-
-
-
-
-//     // while(p -> next != NULL)
-//     // {
-//     //     if(p -> next -> freq > p -> freq)
-//     //     {
-//     //         tmp = p -> freq;
-//     //         p -> freq = p -> next -> freq;
-//     //         p -> next -> freq = tmp;
-//     //     }
-//     //     p = p -> next;
-//     // }
-// }
-
-Tree* buildTree(Tree* root, list* head)
+int freqOutput(char* filename, Tree** forest, int size)
 {
+    FILE* fh = fopen(filename, "w");
+    
+    if(fh == NULL)
+    {
+        fclose(fh);
+        fprintf(stderr,"failed to open freqOutput file.\n");
+        return EXIT_FAILURE;
+    }
+
+    int i;
+    int j;
+    long zero = ZERO;
+    for(i = 0; i < 256; i++)
+    {
+        for(j = 0;j < size; j++)
+        {
+            if(forest[j] -> chr == (char)i)
+            {
+                fwrite(&(forest[j] -> freq), sizeof(long), 1, fh);
+            }
+        }
+        if(j != size - 1)
+            fwrite(&(zero), sizeof(long), 1, fh);
+    }
 
 }
