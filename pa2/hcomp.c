@@ -179,5 +179,4 @@ int freqOutput(char* filename, Tree** forest, int size)
         if(j != size - 1)
             fwrite(&(zero), sizeof(long), 1, fh);
     }
-
 }

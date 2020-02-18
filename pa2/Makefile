@@ -5,32 +5,28 @@ VAL = valgrind --tool=memcheck --leak-check=full --verbose --show-leak-kinds=all
 
 TESTFLAGS = 
 
-SRCS = pa1.c shell_array.c shell_list.c
+SRCS = pa2.c shell_array.c shell_list.c
 OBJS = $(SRCS:%.c=%.o)
 
-pa1: $(OBJS)
-	$(GCC) $(TESTFLAGS) $(OBJS) -o pa1
+pa2: $(OBJS)
+	$(GCC) $(TESTFLAGS) $(OBJS) -o pa2
 	
 .c.o:
 	$(GCC) $(TESTFLAGS) -c $*.c
 
-testmemory: pa1
-	$(VAL) --log-file=memcheck1.txt ./pa1 -l examples/15.b  output1
+testmemory: pa2
+	$(VAL) --log-file=memcheck1.txt ./pa2 -l original/gophers  output1
 	code memcheck1.txt
 
-test1: pa1
-	./pa1 -a examples/1K.b output1a
-	diff output1a examples/1Ksa.b
-
-test2: pa1
-	./pa1 -l examples/15.b output1l
-	diff output1l examples/15sa.b
+test1: pa2
+	/pa2 -l original/gophers  freqOutput1
+	diff freqOutput1 original/gophers
 	
 clean: # remove all machine generated files
 	rm -f *.o output?
 	
 zip:
-	zip pa1.zip pa1.c shell_array.c shell_list.c
+	zip pa2.zip *.c *.h
 
 update:
 	git push -u https://Zanedaws:40002608Zanefunk@github.com/Zanedaws/ECE368.git master
