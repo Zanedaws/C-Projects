@@ -1,25 +1,20 @@
-WARNING = -Wall -Wshadow --pedantic
-ERROR = -Wvla
-GCC = gcc -O3 -std=c99 $(WARNING) $(ERROR)
+GCC = gcc -std=c99 -Wall -Wshadow -Wvla -pedantic -O3
 VAL = valgrind --tool=memcheck --leak-check=full --verbose --show-leak-kinds=all --track-origins=yes
 
-TESTFLAGS = 
-
-SRCS = pa2.c shell_array.c shell_list.c
+SRCS = pa2.c hcomp.c
 OBJS = $(SRCS:%.c=%.o)
 
 pa2: $(OBJS)
-	$(GCC) $(TESTFLAGS) $(OBJS) -o pa2
+	$(GCC) $(OBJS) -o pa2
 	
 .c.o:
-	$(GCC) $(TESTFLAGS) -c $*.c
+	$(GCC) -c $*.c
 
 testmemory: pa2
-	$(VAL) --log-file=memcheck1.txt ./pa2 -l original/gophers  output1
-	code memcheck1.txt
+	$(VAL) --log-file=memcheck1.txt ./pa2 original/gophers  output1
 
 test1: pa2
-	/pa2 -l original/gophers  freqOutput1
+	/pa2 original/gophers  freqOutput1
 	diff freqOutput1 original/gophers
 	
 clean: # remove all machine generated files

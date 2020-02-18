@@ -11,18 +11,19 @@ int readFromFIle(char* filename, Tree** forest)
     if(fh == NULL)
     {
         fprintf(stderr, "file failed to open\n");
-        return NULL;
+        return 0;
     }
 
-    char tmp = NULL;
+    char tmp;
     int count = 0;
+    int size = STARTSIZE;
 
     while(!feof(fh))
     {
         tmp = fgetc(fh);
         if(!feof(fh))
         {
-            count = addTree(forest, tmp, count);
+            size = addTree(forest, tmp, &count, size);
         }
     }
 
@@ -35,38 +36,42 @@ int readFromFIle(char* filename, Tree** forest)
 
 
 
-int addTree(Tree** forest, char tmp, int* count)
+int addTree(Tree** forest, char tmp, int* count, int size)
 {
-    int sizeE = sizeof(forest)/sizeof(*forest);
-
-    count++;
-
     int i;
     //check if character is already in forest
-    for(i = 0; i < count; i++)
+    for(i = 0; i < *count; i++)
     {
         if(forest[i] -> chr == tmp)
         {
             forest[i] -> freq += 1;
-            return count;
+            return size;
         }
     }
 
 
     //if it isn't then check if the array is big enough, if not increase the size
-    if(count - 1 < sizeE)
+    if(*count != 0 && *count - 1 < size)
     {
-        forest[count - 1] -> chr = tmp;
-        forest[count - 1] -> freq = 1;
+        forest[*count - 1] -> chr = tmp;
+        forest[*count - 1] -> freq = 1;
+    }
+    else if(*count == 0)
+    {
+        forest[*count] -> chr = tmp;
+        forest[*count] -> freq = 1;
+        *count++;
     }
     else
     {
-        forest = realloc(forest, sizeof(*forest) * (sizeE + sizeE/4));
-        forest[count - 1] -> chr = tmp;
-        forest[count - 1] -> freq = 1;
+        forest = realloc(forest, sizeof(*forest) * (*count + size/4));
+        size = *count + size/4;
+        forest[*count - 1] -> chr = tmp;
+        forest[*count - 1] -> freq = 1;
+        *count++;
     }
 
-    return count;
+    return size;
 }
 
 
@@ -75,13 +80,12 @@ Tree* buildTree(Tree** forest, int size)
     Tree* root = malloc(sizeof(*root));
     root -> left = NULL;
     root -> right = NULL;
-    root -> chr = NULL;
+    root -> chr = '\0';
     root -> freq = 0;
 
 
     if(size > 1)
     {
-        Tree* root = malloc(sizeof(*root));
         root -> left = forest[0];
         root -> right = forest[1];
         root -> freq = forest[0] -> freq + forest[1] -> freq;
@@ -89,7 +93,7 @@ Tree* buildTree(Tree** forest, int size)
         Tree** newForest = malloc(sizeof(Tree*) * size - 1);
         int i;
         int j = 0;
-        for(i = 0; i < size - 1, i++)
+        for(i = 0; i < size - 1; i++)
         {
             if(j < size && forest[j] -> freq < root -> freq)
             {
@@ -142,7 +146,7 @@ void sortForest(Tree** forest, int size)
             {
                 forest[i] -> freq = forest[i-h] -> freq;
                 i = i - h;
-                array[i] -> freq = tmp;
+                forest[i] -> freq = tmp;
             }
         }
         //decrement sequence
@@ -164,6 +168,7 @@ int freqOutput(char* filename, Tree** forest, int size)
         return EXIT_FAILURE;
     }
 
+    int written;
     int i;
     int j;
     long zero = ZERO;
@@ -173,10 +178,26 @@ int freqOutput(char* filename, Tree** forest, int size)
         {
             if(forest[j] -> chr == (char)i)
             {
-                fwrite(&(forest[j] -> freq), sizeof(long), 1, fh);
+                written = fwrite(&(forest[j] -> freq), sizeof(long), 1, fh);
+                if(written != 1)
+                {
+                    fprintf(stderr, "failed to write a freq.\n");
+                    fclose(fh);
+                    return EXIT_FAILURE;
+                }
             }
         }
         if(j != size - 1)
-            fwrite(&(zero), sizeof(long), 1, fh);
+        {
+            written = fwrite(&(zero), sizeof(long), 1, fh);
+            if(written != 1)
+            {
+                fprintf(stderr, "failed to write a ZERO freq.\n");
+                fclose(fh);
+                return EXIT_FAILURE;
+            }
+        }
     }
+
+    return EXIT_SUCCESS;
 }
