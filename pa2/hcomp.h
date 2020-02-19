@@ -1,5 +1,6 @@
 #define STARTSIZE 4
 #define GROWFACTOR 1.5
+#define COUNT 10
 
 typedef struct HTree{ //huffman tree
     char chr; //character for the node on the tree
@@ -20,3 +21,6 @@ Tree** shift(Tree** forest, int* size, int ammount);
 void preTravHead(char* filename, Tree * root);
 void preTravCode(char* filename, Tree* root);
 
+//testing code
+void printTree(Tree* root);
+void print2DUtil(Tree* root, int space);

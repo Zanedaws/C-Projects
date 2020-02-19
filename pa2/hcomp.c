@@ -85,21 +85,13 @@ Tree** addTree(Tree** forest, char tmp, int* count, int* size)
 
 Tree** destroyForest(Tree** forest, int count)
 {
-    if(count > 1)
+    int i;
+    for(i = 0; i < count; i++)
     {
-        int i;
-        for(i = 0; i < count; i++)
-        {  
-            destroyTree(forest[i]);
-        }
-    }
-    else
-    {
-        destroyTree(forest[0]); 
+        destroyTree(forest[i]);
     }
     free(forest);
-    forest = NULL;
-    return forest;
+    return NULL;
 }
 
 void destroyTree(Tree* root)
@@ -116,44 +108,94 @@ void destroyTree(Tree* root)
 Tree** shift(Tree** forest, int* size, int ammount)
 {
     int i;
+    int k;
     for(i = ammount; i < *size; i++)
-    {
-        memcpy(forest[i - ammount], forest[i], sizeof(*forest[i]));
+    {   
+        // fprintf(stderr, "frequency printout\n");
+        // for(k = 0; k < *size; k++)
+        // {
+        //     printTree(forest[k]);
+        // }
+        // fprintf(stderr, "pre shift\n\n");
+        forest[i - ammount] -> freq = forest[i] -> freq;
+        forest[i - ammount] -> chr = forest[i] -> chr;
+        forest[i - ammount] -> left = forest[i] -> left;
+        forest[i - ammount] -> right = forest[i] -> right;
+        // fprintf(stderr, "frequency printout\n");
+        // for(k = 0; k < *size; k++)
+        // {
+        //     printTree(forest[k]);
+        // }
+        // fprintf(stderr, "post shift\n\n");
     }
-    *size = *size - ammount;
+
+    *size = *size - 1;
+
     return forest;
 }
 
 Tree** insert(Tree* root, Tree** forest, int* size)
 {
     int i = 0;
-    while(root -> freq > forest[i] -> freq && i < *size)
+    fprintf(stderr, "root -> freq = %ld\n", root -> freq);
+    while(root -> freq > forest[i] -> freq && i < *size - 1)
     {
         i++;
     }
-    int j = *size;
+    fprintf(stderr, "stopped freq = %ld\n", forest[i] -> freq);
+    int j = *size - 2;
     while(j >= i)
     {
-        forest[j + 1] = forest[j];
+        forest[j + 1] -> freq = forest[j] -> freq;
+        forest[j + 1] -> chr = forest[j] -> chr;
+        forest[j + 1] -> left = forest[j] -> left;
+        forest[j + 1] -> right = forest[j] -> right;
         j--;
     }
-    forest[i] = root;
+    forest[i] -> freq = root -> freq;
+    forest[i] -> chr = root -> chr;
+    forest[i] -> left = root -> left;
+    forest[i] -> right = root -> right;
+
+
+    int k;
+    fprintf(stderr, "\n\n");
+    for(k = 0; k < *size; k++)
+    {
+        // printTree(forest[k]);
+        fprintf(stderr, "chr = %c, freq = %ld\n", forest[k] -> chr, forest[k] -> freq);
+    }
+    fprintf(stderr,"\n\n");
+    fprintf(stderr,"at index %d\n", i);
+
     return forest;
 }
 
 Tree** buildTree(Tree** forest, int size)
 {
-    Tree* root = malloc(sizeof(*root));
-    root -> left = forest[0];
-    root -> right = forest[1];
-    root -> freq = forest[0] -> freq + forest[1] -> freq;
+    while(size > 1)
+    {
+        Tree* newRoot = malloc(sizeof(*newRoot));
 
-    forest = shift(forest, &size, 2);
+        newRoot -> freq = forest[0] -> freq + forest[1] -> freq;
+        newRoot -> chr = '\0';
+        newRoot -> left = malloc(sizeof(*(newRoot -> left)));
+        newRoot -> right = malloc(sizeof(*(newRoot -> right)));
+        newRoot -> left -> left = NULL;
+        newRoot -> right -> right = NULL;
 
-    forest = insert(root, forest, &size);
+        newRoot -> left -> freq = forest[0] -> freq;
+        newRoot -> right -> freq = forest[1] -> freq;
+        newRoot -> left -> chr = forest[0] -> chr;
+        newRoot -> right -> chr = forest[1] -> chr;
+        newRoot -> left -> left = forest[0] -> left;
+        newRoot -> right -> right = forest[1] -> right;
+        newRoot -> left -> right = forest[0] -> right;
+        newRoot -> right -> left = forest[1] -> left;
 
-    if(size > 1)
-        forest = buildTree(forest, size);
+        forest = shift(forest, &size, 2);
+        forest = insert(newRoot, forest, &size);
+    }   
     return forest;
 }
 
@@ -263,3 +305,44 @@ int freqOutput(char* filename, Tree** forest, int size)
     fclose(fh);
     return EXIT_SUCCESS;
 }
+
+void printTree(Tree* root)
+{
+    if(root == NULL)
+    {
+        fprintf(stderr, "root NULL\n");
+        return;
+    }
+    if(root -> left == NULL && root -> right == NULL)
+    {
+        fprintf(stderr, "chr = %c, freq = %ld\n", root -> chr, root -> freq);
+        return;
+    }
+    fprintf(stderr, "moved left\n");
+    printTree(root -> left);
+    fprintf(stderr, "moved right\n");
+    printTree(root -> right);
+}
+
+void print2DUtil(Tree *root, int space) 
+{ 
+    // Base case 
+    if (root == NULL) 
+        return; 
+  
+    // Increase distance between levels 
+    space += COUNT; 
+  
+    // Process right child first 
+    print2DUtil(root->right, space); 
+  
+    // Print current node after space 
+    // count 
+    fprintf(stderr, "\n"); 
+    for (int i = COUNT; i < space; i++) 
+        fprintf(stderr, " "); 
+    fprintf(stderr, "%ld, %c\n", root->freq, root -> chr); 
+  
+    // Process left child 
+    print2DUtil(root->left, space); 
+} 

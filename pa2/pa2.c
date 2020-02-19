@@ -15,6 +15,7 @@ int main(int argc, char** argv)
     int count = 0;
 
     forest = readFromFile(argv[1], forest, &count);
+    fprintf(stderr, "count = %d\n", count);
 
     int writCheck;
 
@@ -25,13 +26,21 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+
     Tree** rootForest = buildTree(forest, count);
+    // int space = 0;
+    // for(i = 0; i < count; i++)
+    // {
+    //     fprintf(stderr, "tree at rootForest[%d]\n", i);
+    //     print2DUtil(rootForest[i], space);
+    // }
+    // fprintf(stderr,"\n\n");
+
+    destroyTree(rootForest[0]);
+
     
-    fprintf(stderr, "count = %d\n", count);
 
-    // destroyTree(rootForest[0]);
-
-    // forest = destroyForest(forest, count);
+    forest = destroyForest(forest, count);
 
     return EXIT_SUCCESS;
 }
