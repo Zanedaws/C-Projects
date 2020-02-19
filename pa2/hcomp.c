@@ -34,8 +34,6 @@ Tree** readFromFile(char* filename, Tree** forest, int* count)
     return forest;
 }
 
-
-
 Tree** addTree(Tree** forest, char tmp, int* count, int* size)
 {
     Tree* newTree = malloc(sizeof(*newTree));
@@ -87,52 +85,76 @@ Tree** addTree(Tree** forest, char tmp, int* count, int* size)
 
 Tree** destroyForest(Tree** forest, int count)
 {
-    int i;
-    for(i = 0; i < count; i++)
+    if(count > 1)
     {
-        free(forest[i]);
+        int i;
+        for(i = 0; i < count; i++)
+        {  
+            destroyTree(forest[i]);
+        }
+    }
+    else
+    {
+        destroyTree(forest[0]); 
     }
     free(forest);
     forest = NULL;
     return forest;
 }
 
+void destroyTree(Tree* root)
+{
+    if(root != NULL)
+    {
+        destroyTree(root -> left);
+        destroyTree(root -> right);
+        free(root);
+    }
+}
 
-Tree* buildTree(Tree** forest, int size)
+
+Tree** shift(Tree** forest, int* size, int ammount)
+{
+    int i;
+    for(i = ammount; i < *size; i++)
+    {
+        memcpy(forest[i - ammount], forest[i], sizeof(*forest[i]));
+    }
+    *size = *size - ammount;
+    return forest;
+}
+
+Tree** insert(Tree* root, Tree** forest, int* size)
+{
+    int i = 0;
+    while(root -> freq > forest[i] -> freq && i < *size)
+    {
+        i++;
+    }
+    int j = *size;
+    while(j >= i)
+    {
+        forest[j + 1] = forest[j];
+        j--;
+    }
+    forest[i] = root;
+    return forest;
+}
+
+Tree** buildTree(Tree** forest, int size)
 {
     Tree* root = malloc(sizeof(*root));
-    root -> left = NULL;
-    root -> right = NULL;
-    root -> chr = '\0';
-    root -> freq = 0;
+    root -> left = forest[0];
+    root -> right = forest[1];
+    root -> freq = forest[0] -> freq + forest[1] -> freq;
 
+    forest = shift(forest, &size, 2);
+
+    forest = insert(root, forest, &size);
 
     if(size > 1)
-    {
-        root -> left = forest[0];
-        root -> right = forest[1];
-        root -> freq = forest[0] -> freq + forest[1] -> freq;
-
-        Tree** newForest = malloc(sizeof(Tree*) * size - 1);
-        int i;
-        int j = 0;
-        for(i = 0; i < size - 1; i++)
-        {
-            if(j < size && forest[j] -> freq < root -> freq)
-            {
-                newForest[i] = forest[j];
-                j++;
-            }
-            else
-            {
-                newForest[i] = root;
-            }
-        }
-
-        root = buildTree(newForest, size - 1);
-        return root;
-    }
-    return root;
+        forest = buildTree(forest, size);
+    return forest;
 }
 
 void sortForest(Tree** forest, int size)

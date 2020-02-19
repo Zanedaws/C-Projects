@@ -25,7 +25,13 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    forest = destroyForest(forest, count);
+    Tree** rootForest = buildTree(forest, count);
+    
+    fprintf(stderr, "count = %d\n", count);
+
+    // destroyTree(rootForest[0]);
+
+    // forest = destroyForest(forest, count);
 
     return EXIT_SUCCESS;
 }
