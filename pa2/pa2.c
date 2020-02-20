@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include "hcomp.h"
 
 int main(int argc, char** argv)
 {
-    if(argc != 3)
+    if(argc != 5)
     {
         fprintf(stderr,"not correct number of args\n");
         return EXIT_FAILURE;
@@ -15,7 +16,8 @@ int main(int argc, char** argv)
     int count = 0;
 
     forest = readFromFile(argv[1], forest, &count);
-    fprintf(stderr, "count = %d\n", count);
+
+    // fprintf(stderr, "count = %d\n", count);
 
     int writCheck;
 
@@ -26,21 +28,21 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+    Tree** rootForest = buildTree(forest, &count);
 
-    Tree** rootForest = buildTree(forest, count);
-    // int space = 0;
-    // for(i = 0; i < count; i++)
-    // {
-    //     fprintf(stderr, "tree at rootForest[%d]\n", i);
-    //     print2DUtil(rootForest[i], space);
-    // }
-    // fprintf(stderr,"\n\n");
+    // print2DUtil(rootForest[0], 0);
+
+    printCode(argv[3], rootForest[0]);
+
+    FILE* fh = fopen(argv[4], "w");
+
+    printHeader(rootForest[0], fh);
+
+    print2DUtil(rootForest[0], 0);
 
     destroyTree(rootForest[0]);
 
-    
-
-    forest = destroyForest(forest, count);
+    free(rootForest);
 
     return EXIT_SUCCESS;
 }

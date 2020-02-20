@@ -14,7 +14,7 @@ testmemory: pa2
 	$(VAL) --log-file=memcheck1.txt ./pa2 original/gophers freqOutput1
 
 test1: pa2
-	./pa2 original/gophers freqOutput1
+	./pa2 original/gophers freqOutput1 codeOutput1 headerOutput1
 	diff freqOutput1 count/gophers.count
 
 test2: pa2

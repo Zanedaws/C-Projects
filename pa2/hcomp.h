@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdint.h>
 #define STARTSIZE 4
 #define GROWFACTOR 1.5
 #define COUNT 10
@@ -15,11 +17,14 @@ Tree** destroyForest(Tree** forest, int count);
 void destroyTree(Tree* root);
 int freqOutput(char* filename, Tree** forest, int size);
 void sortForest(Tree** forest, int size);
-Tree** buildTree(Tree** forest, int size);
+Tree** buildTree(Tree** forest, int* size);
 Tree** insert(Tree* root, Tree** forest, int* size);
 Tree** shift(Tree** forest, int* size, int ammount);
 void preTravHead(char* filename, Tree * root);
-void preTravCode(char* filename, Tree* root);
+void printCode(char* filename, Tree* root);
+void getSequence(Tree* root, uint8_t seq, int depth, FILE* fh);
+void printSequence(uint8_t seq, int depth, FILE* fh);
+void printHeader(Tree* root, FILE* fh);
 
 //testing code
 void printTree(Tree* root);

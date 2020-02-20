@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #define ZERO 0
 
 Tree** readFromFile(char* filename, Tree** forest, int* count)
@@ -86,7 +87,7 @@ Tree** addTree(Tree** forest, char tmp, int* count, int* size)
 Tree** destroyForest(Tree** forest, int count)
 {
     int i;
-    for(i = 0; i < count; i++)
+    for(i = count - 1; i >= 0; i--)
     {
         destroyTree(forest[i]);
     }
@@ -102,101 +103,7 @@ void destroyTree(Tree* root)
         destroyTree(root -> right);
         free(root);
     }
-}
-
-
-Tree** shift(Tree** forest, int* size, int ammount)
-{
-    int i;
-    int k;
-    for(i = ammount; i < *size; i++)
-    {   
-        // fprintf(stderr, "frequency printout\n");
-        // for(k = 0; k < *size; k++)
-        // {
-        //     printTree(forest[k]);
-        // }
-        // fprintf(stderr, "pre shift\n\n");
-        forest[i - ammount] -> freq = forest[i] -> freq;
-        forest[i - ammount] -> chr = forest[i] -> chr;
-        forest[i - ammount] -> left = forest[i] -> left;
-        forest[i - ammount] -> right = forest[i] -> right;
-        // fprintf(stderr, "frequency printout\n");
-        // for(k = 0; k < *size; k++)
-        // {
-        //     printTree(forest[k]);
-        // }
-        // fprintf(stderr, "post shift\n\n");
-    }
-
-    *size = *size - 1;
-
-    return forest;
-}
-
-Tree** insert(Tree* root, Tree** forest, int* size)
-{
-    int i = 0;
-    fprintf(stderr, "root -> freq = %ld\n", root -> freq);
-    while(root -> freq > forest[i] -> freq && i < *size - 1)
-    {
-        i++;
-    }
-    fprintf(stderr, "stopped freq = %ld\n", forest[i] -> freq);
-    int j = *size - 2;
-    while(j >= i)
-    {
-        forest[j + 1] -> freq = forest[j] -> freq;
-        forest[j + 1] -> chr = forest[j] -> chr;
-        forest[j + 1] -> left = forest[j] -> left;
-        forest[j + 1] -> right = forest[j] -> right;
-        j--;
-    }
-    forest[i] -> freq = root -> freq;
-    forest[i] -> chr = root -> chr;
-    forest[i] -> left = root -> left;
-    forest[i] -> right = root -> right;
-
-
-    int k;
-    fprintf(stderr, "\n\n");
-    for(k = 0; k < *size; k++)
-    {
-        // printTree(forest[k]);
-        fprintf(stderr, "chr = %c, freq = %ld\n", forest[k] -> chr, forest[k] -> freq);
-    }
-    fprintf(stderr,"\n\n");
-    fprintf(stderr,"at index %d\n", i);
-
-    return forest;
-}
-
-Tree** buildTree(Tree** forest, int size)
-{
-    while(size > 1)
-    {
-        Tree* newRoot = malloc(sizeof(*newRoot));
-
-        newRoot -> freq = forest[0] -> freq + forest[1] -> freq;
-        newRoot -> chr = '\0';
-        newRoot -> left = malloc(sizeof(*(newRoot -> left)));
-        newRoot -> right = malloc(sizeof(*(newRoot -> right)));
-        newRoot -> left -> left = NULL;
-        newRoot -> right -> right = NULL;
-
-        newRoot -> left -> freq = forest[0] -> freq;
-        newRoot -> right -> freq = forest[1] -> freq;
-        newRoot -> left -> chr = forest[0] -> chr;
-        newRoot -> right -> chr = forest[1] -> chr;
-        newRoot -> left -> left = forest[0] -> left;
-        newRoot -> right -> right = forest[1] -> right;
-        newRoot -> left -> right = forest[0] -> right;
-        newRoot -> right -> left = forest[1] -> left;
-
-        forest = shift(forest, &size, 2);
-        forest = insert(newRoot, forest, &size);
-    }   
-    return forest;
+    root = NULL;
 }
 
 void sortForest(Tree** forest, int size)
@@ -221,6 +128,7 @@ void sortForest(Tree** forest, int size)
     } while (h < size);
     h = (h - 1) / 3;
     
+    // h = 1;
 
     //shell sort --------------------------------------------------
     while (h > 0)
@@ -306,6 +214,168 @@ int freqOutput(char* filename, Tree** forest, int size)
     return EXIT_SUCCESS;
 }
 
+
+//TREE BUILDING STARTS HERE---------------------------------------------------------------------------------------------------------------------
+
+Tree** buildTree(Tree** forest, int* size)
+{
+    while(*size > 1)
+    {
+        //initialize new root for tree
+        Tree* newRoot = malloc(sizeof(*newRoot));
+        newRoot -> freq = forest[0] -> freq + forest[1] -> freq;
+        newRoot -> chr = '\0';
+        newRoot -> left = malloc(sizeof(*(newRoot -> left)));
+        newRoot -> right = malloc(sizeof(*(newRoot -> right)));
+        newRoot -> left -> left = NULL;
+        newRoot -> right -> right = NULL;
+
+
+        //copy all data into a new left and right node
+        newRoot -> left -> freq = forest[0] -> freq;
+        newRoot -> right -> freq = forest[1] -> freq;
+        newRoot -> left -> chr = forest[0] -> chr;
+        newRoot -> right -> chr = forest[1] -> chr;
+        newRoot -> left -> left = forest[0] -> left;
+        newRoot -> right -> right = forest[1] -> right;
+        newRoot -> left -> right = forest[0] -> right;
+        newRoot -> right -> left = forest[1] -> left;
+
+        forest = shift(forest, size, 2);
+        // fprintf(stderr, "size = %d\n", *size);
+        forest = insert(newRoot, forest, size);
+        free(newRoot);
+    }   
+    return forest;
+}
+
+Tree** insert(Tree* root, Tree** forest, int* size)
+{
+    //TESTING CODE-------------------------------------------------------------------------
+    // int k;
+    // for(k = 0; k < *size; k++)
+    // {
+    //     fprintf(stderr, "chr = (%c)\tfreq = %ld\n", forest[k] -> chr, forest[k] -> freq);
+    // }
+    // fprintf(stderr, "\n");
+    //TESTING CODE-------------------------------------------------------------------------
+
+    int i = 0;
+    while(root -> freq >= forest[i] -> freq && i < *size - 1)
+    {
+        i++;
+    }
+    int j = *size - 2;
+    while(j >= i)
+    {
+        forest[j + 1] -> freq = forest[j] -> freq;
+        forest[j + 1] -> chr = forest[j] -> chr;
+        forest[j + 1] -> left = forest[j] -> left;
+        forest[j + 1] -> right = forest[j] -> right;
+        j--;
+    }
+    forest[i] -> freq = root -> freq;
+    forest[i] -> chr = root -> chr;
+    forest[i] -> left = root -> left;
+    forest[i] -> right = root -> right;
+
+    //TESTING CODE-------------------------------------------------------------------------
+    // for(k = 0; k < *size; k++)
+    // {
+    //     fprintf(stderr, "chr = (%c)\tfreq = %ld\n", forest[k] -> chr, forest[k] -> freq);
+    // }
+    // fprintf(stderr, "\n");
+    //TESTING CODE-------------------------------------------------------------------------
+
+    return forest;
+}
+
+Tree** shift(Tree** forest, int* size, int ammount)
+{
+    int i;
+    for(i = ammount; i < *size; i++)
+    {   
+        forest[i - ammount] -> freq = forest[i] -> freq;
+        forest[i - ammount] -> chr = forest[i] -> chr;
+        forest[i - ammount] -> left = forest[i] -> left;
+        forest[i - ammount] -> right = forest[i] -> right;
+    }
+
+    free(forest[i - 1]);
+
+    *size = *size - 1;
+
+    return forest;
+}
+
+
+//CODE OUTPUT START------------------------------------------------------------------------
+
+void printCode(char* filename, Tree* root)
+{
+    FILE* fh = fopen(filename, "w");
+    uint8_t sequence = 0x00;
+    int depth = 0;
+    getSequence(root, sequence, depth, fh);
+    fclose(fh);
+}
+
+void getSequence(Tree* root, uint8_t seq, int depth, FILE* fh)
+{
+
+    if(root -> left == NULL && root -> right == NULL)
+    {
+        fprintf(fh, "%c:", root -> chr);
+        printSequence(seq, depth - 1, fh);
+        fprintf(fh, "\n");
+        return;
+    }
+
+    seq = seq << 1;
+    depth += 1;
+    getSequence(root -> left, seq, depth, fh);
+    seq = seq >> 1;
+    depth--;
+    depth++;
+    seq = (seq << 1) + 0x01;
+    getSequence(root -> right, seq, depth, fh);
+    seq = seq >> 1;
+    depth--;
+}
+
+void printSequence(uint8_t seq, int depth, FILE* fh)
+{
+    int i;
+    uint8_t tmp;
+    for(i = depth; i >= 0; i--)
+    {
+        tmp = seq;
+        seq = seq >> i;
+        fprintf(fh, "%d", seq & 0x01);
+        seq = tmp;
+    }
+    
+}
+
+//HEADER CODE--------------------------------------------------------------------------------
+
+
+void printHeader(Tree* root, FILE* fh)
+{
+    if(root -> chr == '\0')
+    {
+        fprintf(fh, "0");
+        printHeader(root -> left, fh);
+        printHeader(root -> right, fh);
+    }
+    else
+    {
+        fprintf(fh,"1%c", root -> chr);
+    }
+}
+
+
+//TESTING CODE-----------------------------------------------------------------------------
 void printTree(Tree* root)
 {
     if(root == NULL)
