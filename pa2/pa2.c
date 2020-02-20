@@ -38,6 +38,8 @@ int main(int argc, char** argv)
 
     printHeader(rootForest[0], fh);
 
+    fclose(fh);
+
     print2DUtil(rootForest[0], 0);
 
     destroyTree(rootForest[0]);

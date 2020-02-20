@@ -11,7 +11,7 @@ pa2: $(OBJS)
 	$(GCC) -c $*.c
 
 testmemory: pa2
-	$(VAL) --log-file=memcheck1.txt ./pa2 original/gophers freqOutput1
+	$(VAL) --log-file=memcheck1.txt ./pa2 original/gophers freqOutput1 codeOutput1 headerOutput1
 
 test1: pa2
 	./pa2 original/gophers freqOutput1 codeOutput1 headerOutput1
@@ -22,7 +22,7 @@ test2: pa2
 	diff freqOutput1 count/binary1.count
 	
 clean: # remove all machine generated files
-	rm -f *.o output?
+	rm -f *.o freqOutput? codeOutput? headerOutput?
 	
 zip:
 	zip pa2.zip *.c *.h
