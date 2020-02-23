@@ -4,6 +4,12 @@
 #define GROWFACTOR 1.5
 #define COUNT 10
 
+typedef struct CodeHolder{
+    char chr;
+    long code;
+    int depth;
+}Code;
+
 typedef struct HTree{ //huffman tree
     char chr; //character for the node on the tree
     long freq; //frequency or weight of character
@@ -20,11 +26,15 @@ void sortForest(Tree** forest, int size);
 Tree** buildTree(Tree** forest, int* size);
 Tree** insert(Tree* root, Tree** forest, int* size);
 Tree** shift(Tree** forest, int* size, int ammount);
-void preTravHead(char* filename, Tree * root);
-void printCode(char* filename, Tree* root);
-void getSequence(Tree* root, uint8_t seq, int depth, FILE* fh);
-void printSequence(uint8_t seq, int depth, FILE* fh);
+void printCode(char* filename, Tree* root, Code** codeList);
+void getSequence(Tree* root, long seq, int depth, FILE* fh, Code** codeList, int* index);
+void printSequence(long seq, int depth, FILE* fh, Code** codeList, int* index, char chr);
 void printHeader(Tree* root, FILE* fh);
+
+void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList);
+void printCompCode(Code** codeList, char key, FILE* fh, int* totalBits, int* bits);
+
+void destroyCodeList(Code** codeList, int size);
 
 //testing code
 void printTree(Tree* root);

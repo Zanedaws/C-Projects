@@ -311,50 +311,93 @@ Tree** shift(Tree** forest, int* size, int ammount)
 
 //CODE OUTPUT START------------------------------------------------------------------------
 
-void printCode(char* filename, Tree* root)
+void printCode(char* filename, Tree* root, Code** codeList)
 {
     FILE* fh = fopen(filename, "w");
-    uint8_t sequence = 0x00;
+    long sequence = 0x00;
     int depth = 0;
-    getSequence(root, sequence, depth, fh);
+    int index = 0;
+    getSequence(root, sequence, depth, fh, codeList, &index);
     fclose(fh);
 }
 
-void getSequence(Tree* root, uint8_t seq, int depth, FILE* fh)
+void getSequence(Tree* root, long seq, int depth, FILE* fh, Code** codeList, int* index)
 {
-
     if(root -> left == NULL && root -> right == NULL)
     {
         fprintf(fh, "%c:", root -> chr);
-        printSequence(seq, depth - 1, fh);
+        printSequence(seq, depth - 1, fh, codeList, index, root -> chr);
         fprintf(fh, "\n");
         return;
     }
 
     seq = seq << 1;
     depth += 1;
-    getSequence(root -> left, seq, depth, fh);
+    getSequence(root -> left, seq, depth, fh, codeList, index);
     seq = seq >> 1;
     depth--;
     depth++;
-    seq = (seq << 1) + 0x01;
-    getSequence(root -> right, seq, depth, fh);
+    seq = (seq << 1) + 1;
+    getSequence(root -> right, seq, depth, fh, codeList, index);
     seq = seq >> 1;
     depth--;
 }
 
-void printSequence(uint8_t seq, int depth, FILE* fh)
+void printSequence(long seq, int depth, FILE* fh, Code** codeList, int* index, char chr)
 {
     int i;
-    uint8_t tmp;
+    long tmp;
+    fprintf(stderr, "index = %d\n", *index);
+    codeList[*index] = malloc(sizeof(*codeList[*index]));
+    codeList[*index] -> chr = chr;
+    codeList[*index] -> code = seq;
+    codeList[*index] -> depth = depth;
+    (*index)++;
+    fprintf(stderr, "index = %d\n", *index);
     for(i = depth; i >= 0; i--)
     {
         tmp = seq;
         seq = seq >> i;
-        fprintf(fh, "%d", seq & 0x01);
+        fprintf(fh, "%ld", seq & 0x01);
         seq = tmp;
     }
     
+}
+
+
+void destroyCodeList(Code** codeList, int size)
+{
+    int i;
+    for(i = 0; i < size; i++)
+    {
+        free(codeList[i]);
+    }
+    free(codeList);
+    codeList = NULL;
+}
+
+//COMPRESSION CODE---------------------------------------------------------------------------
+
+void printCompCode(Code** codeList, char key, FILE* fh, int* totalBits, int* bits)
+{
+    
+    
+}
+
+
+void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList)
+{
+    int totalBits = 0;
+    char tmp;
+    int bits = 0;
+    while(!feof(readFile))
+    {
+        tmp = fgetc(readFile);
+        if(!feof(readFile))
+        {
+            printCompCode(codeList, tmp, writeFile, &totalBits, &bits);
+        }
+    }
 }
 
 //HEADER CODE--------------------------------------------------------------------------------

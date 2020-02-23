@@ -6,7 +6,7 @@
 
 int main(int argc, char** argv)
 {
-    if(argc != 5)
+    if(argc != 6)
     {
         fprintf(stderr,"not correct number of args\n");
         return EXIT_FAILURE;
@@ -18,6 +18,8 @@ int main(int argc, char** argv)
     forest = readFromFile(argv[1], forest, &count);
 
     // fprintf(stderr, "count = %d\n", count);
+
+    int preBuildCount = count;
 
     int writCheck;
 
@@ -32,7 +34,11 @@ int main(int argc, char** argv)
 
     // print2DUtil(rootForest[0], 0);
 
-    printCode(argv[3], rootForest[0]);
+    Code** codeList = malloc(sizeof(*codeList) * preBuildCount);
+
+    printCode(argv[3], rootForest[0], codeList);
+
+    
 
     FILE* fh = fopen(argv[4], "w");
 
@@ -40,7 +46,17 @@ int main(int argc, char** argv)
 
     fclose(fh);
 
+    FILE* writeFile = fopen(argv[5], "w");
+    FILE* readFile = fopen(argv[1], "r");
+
+    readToCompress(readFile, writeFile, codeList);
+
+    fclose(writeFile);
+    fclose(readFile);
+
     print2DUtil(rootForest[0], 0);
+
+    destroyCodeList(codeList, preBuildCount);
 
     destroyTree(rootForest[0]);
 
