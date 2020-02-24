@@ -31,11 +31,16 @@ void getSequence(Tree* root, long seq, int depth, FILE* fh, Code** codeList, int
 void printSequence(long seq, int depth, FILE* fh, Code** codeList, int* index, char chr);
 void printHeader(Tree* root, FILE* fh);
 
-void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList);
-void printCompCode(Code** codeList, char key, FILE* fh, int* totalBits, int* bits);
+void printHeaderInfo(FILE* writeFile, Tree* root, int* bits, int* totalBits, int* totalBytesAdded);
+void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root, long size);
+void printCompCode(Code** codeList, char key, FILE* writeFile, int* totalBits, int* bits, long size, long* totalNumChar);
+void printNumChar(FILE* readFile, FILE* writeFile);
+void printHuffNum(FILE* writeFIle, long size);
+int reverseByte(int bin);
 
 void destroyCodeList(Code** codeList, int size);
 
 //testing code
 void printTree(Tree* root);
 void print2DUtil(Tree* root, int space);
+void printBinary(int bin, int length);

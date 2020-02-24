@@ -158,14 +158,6 @@ void sortForest(Tree** forest, int size)
 int freqOutput(char* filename, Tree** forest, int size)
 {
 
-    // //checking frequencies------------------------------------------------------------
-    // int k;
-    // for(k = 0; k < size; k++)
-    // {
-    //     fprintf(stderr, "%c -> freq: %ld\n", forest[k] -> chr, forest[k] -> freq);
-    // }
-    // //--------------------------------------------------------------------------------
-
 
     FILE* fh = fopen(filename, "w");
     
@@ -242,7 +234,6 @@ Tree** buildTree(Tree** forest, int* size)
         newRoot -> right -> left = forest[1] -> left;
 
         forest = shift(forest, size, 2);
-        // fprintf(stderr, "size = %d\n", *size);
         forest = insert(newRoot, forest, size);
         free(newRoot);
     }   
@@ -251,14 +242,6 @@ Tree** buildTree(Tree** forest, int* size)
 
 Tree** insert(Tree* root, Tree** forest, int* size)
 {
-    //TESTING CODE-------------------------------------------------------------------------
-    // int k;
-    // for(k = 0; k < *size; k++)
-    // {
-    //     fprintf(stderr, "chr = (%c)\tfreq = %ld\n", forest[k] -> chr, forest[k] -> freq);
-    // }
-    // fprintf(stderr, "\n");
-    //TESTING CODE-------------------------------------------------------------------------
 
     int i = 0;
     while(root -> freq >= forest[i] -> freq && i < *size - 1)
@@ -278,14 +261,6 @@ Tree** insert(Tree* root, Tree** forest, int* size)
     forest[i] -> chr = root -> chr;
     forest[i] -> left = root -> left;
     forest[i] -> right = root -> right;
-
-    //TESTING CODE-------------------------------------------------------------------------
-    // for(k = 0; k < *size; k++)
-    // {
-    //     fprintf(stderr, "chr = (%c)\tfreq = %ld\n", forest[k] -> chr, forest[k] -> freq);
-    // }
-    // fprintf(stderr, "\n");
-    //TESTING CODE-------------------------------------------------------------------------
 
     return forest;
 }
@@ -347,13 +322,11 @@ void printSequence(long seq, int depth, FILE* fh, Code** codeList, int* index, c
 {
     int i;
     long tmp;
-    fprintf(stderr, "index = %d\n", *index);
     codeList[*index] = malloc(sizeof(*codeList[*index]));
     codeList[*index] -> chr = chr;
     codeList[*index] -> code = seq;
-    codeList[*index] -> depth = depth;
+    codeList[*index] -> depth = depth + 1;
     (*index)++;
-    fprintf(stderr, "index = %d\n", *index);
     for(i = depth; i >= 0; i--)
     {
         tmp = seq;
@@ -378,26 +351,176 @@ void destroyCodeList(Code** codeList, int size)
 
 //COMPRESSION CODE---------------------------------------------------------------------------
 
-void printCompCode(Code** codeList, char key, FILE* fh, int* totalBits, int* bits)
-{
-    
-    
-}
-
-
-void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList)
+void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root, long size)
 {
     int totalBits = 0;
-    char tmp;
     int bits = 0;
+    long totalNumChar = 0;
+    int totalBytesAdded = 0;
+
+    fseek(writeFile, sizeof(long) * 3, SEEK_SET);
+    printHeaderInfo(writeFile, root, &bits, &totalBits, &totalBytesAdded); //prints the tree topology to the file
+   
+    if(totalBits > 0)
+    {
+        while(totalBits < 8)
+        {
+            bits = bits << 1;
+            totalBits++;
+        }
+        bits = reverseByte(bits);
+        fwrite(&bits, 1, 1, writeFile);
+        totalBytesAdded++;
+    }
+    
+    fseek(writeFile, sizeof(long), SEEK_SET);
+    fwrite(&(totalBytesAdded), sizeof(long), 1, writeFile);
+    totalNumChar += sizeof(long);
+    printNumChar(readFile, writeFile); //prints the number of characters in uncompressed file
+    totalNumChar = totalNumChar + sizeof(long); //add the long to the number of bytes
+
+    totalNumChar += totalBytesAdded;
+    bits = 0;
+    totalBits = 0;
+
+    fseek(writeFile, 0, SEEK_END);
+
+    char tmp;
     while(!feof(readFile))
     {
         tmp = fgetc(readFile);
+        
         if(!feof(readFile))
+            printCompCode(codeList, tmp, writeFile, &totalBits, &bits, size, &totalNumChar);
+    }
+    if(totalBits > 0)
+    {
+        while(totalBits < 8)
         {
-            printCompCode(codeList, tmp, writeFile, &totalBits, &bits);
+            bits = bits << 1;
+            totalBits++;
+        }
+        bits = reverseByte(bits);
+        fwrite(&bits, 1, 1, writeFile);
+        totalNumChar++;
+    }
+
+    rewind(writeFile);
+
+    totalNumChar += sizeof(long);
+    fwrite(&totalNumChar, sizeof(long), 1, writeFile);
+}
+
+void printCompCode(Code** codeList, char key, FILE* writeFile, int* totalBits, int* bits, long size, long* totalNumChar)
+{
+    
+    long i =0;
+    while(i < size)
+    {
+        if(codeList[i] -> chr == key)
+        {
+            *totalBits = *totalBits + codeList[i] -> depth;
+            *bits = *bits << (codeList[i] -> depth);
+            *bits = *bits | codeList[i] -> code;
+            break;
+        }
+        i++;
+    }
+    int tmp;
+    if(*totalBits >= 8)
+    {
+        tmp = *bits;
+        tmp = tmp >> (*totalBits - 8);
+        
+        tmp = reverseByte(tmp);
+        (*totalNumChar)++;
+        fwrite(&tmp, 1, 1, writeFile);
+        *totalBits = *totalBits - 8;
+        
+    }
+}
+
+
+
+void printNumChar(FILE* readFile, FILE* writeFile)
+{
+    fseek(readFile, 0, SEEK_END);
+    long numChar = ftell(readFile);
+    fwrite(&numChar, sizeof(long), 1, writeFile);
+    rewind(readFile);
+}
+
+void printHuffNum(FILE* writeFile, long size)
+{
+    fwrite(&size, sizeof(long), 1, writeFile);
+}
+
+
+void printHeaderInfo(FILE* writeFile, Tree* root, int* bits, int* totalBits, int* totalBytesAdded)
+{
+    if(root -> chr == '\0')
+    {
+        *bits = *bits << 1; 
+        *totalBits = *totalBits + 1;
+        
+        if(*totalBits >= 8)
+        {
+            int toWrite = *bits;
+            
+            toWrite = toWrite >> (*totalBits - 8);
+            toWrite = reverseByte(toWrite);
+            fwrite(&toWrite, 1, 1, writeFile);
+            (*totalBytesAdded)++;
+            *totalBits = *totalBits - 8;
+        }
+
+        printHeaderInfo(writeFile, root -> left, bits, totalBits, totalBytesAdded);
+        printHeaderInfo(writeFile, root -> right, bits, totalBits, totalBytesAdded);
+    }
+    else
+    {
+        *bits = *bits << 1;
+        *bits = *bits + 0x01;
+        *totalBits = *totalBits + 1;
+        int j;
+        int chr = root -> chr;
+        for(j = 0; j < (sizeof(char) * 8); j++)
+        {
+            chr = root -> chr;
+            *bits = *bits << 1;
+            chr = chr >> j;
+            chr = chr & 0x01;
+            *bits = *bits | chr;
+            *totalBits = *totalBits + 1;
+        }
+
+        if(*totalBits >= 8)
+        {
+            int toWrite = *bits;
+            toWrite = toWrite >> (*totalBits - 8);
+            toWrite = reverseByte(toWrite);
+            fwrite(&toWrite, 1, 1, writeFile);
+            (*totalBytesAdded)++;
+            *totalBits = *totalBits - 8;
         }
     }
+}
+
+int reverseByte(int bin)
+{
+
+    int rev = 0;
+    int i;
+    int tmp;
+
+    for(i = 0; i < 8; i++)
+    {
+        tmp = (bin & (1 << i));
+        if(tmp)
+            rev |= (1 << ((8 - 1) - i));
+    }
+
+    return rev;
 }
 
 //HEADER CODE--------------------------------------------------------------------------------
@@ -459,3 +582,16 @@ void print2DUtil(Tree *root, int space)
     // Process left child 
     print2DUtil(root->left, space); 
 } 
+
+void printBinary(int bin, int length)
+{
+    int i;
+    int temp;
+    for(i = 1; i <= length; i++)
+    {
+        temp = bin;
+        temp = temp >> (length - i);
+        fprintf(stderr, "%d", (temp & 0x01));
+    }
+    fprintf(stderr, "\n");
+}
