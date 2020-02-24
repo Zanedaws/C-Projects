@@ -11,15 +11,31 @@ pa2: $(OBJS)
 	$(GCC) -c $*.c
 
 testmemory: pa2
-	$(VAL) --log-file=memcheck1.txt ./pa2 original/gophers freqOutput1 codeOutput1 headerOutput1 compOutput1
+	$(VAL) --log-file=memcheck1.txt ./pa2 original/binary1 freqOutput1 codeOutput1 headerOutput1 compOutput1
 
 test1: pa2
-	./pa2 original/gophers freqOutput1 codeOutput1 headerOutput1
+	./pa2 original/gophers freqOutput1 codeOutput1 headerOutput1 compOutput1
 	diff freqOutput1 count/gophers.count
 
 test2: pa2
-	./pa2 original/binary1  freqOutput1
+	./pa2 original/binary1 freqOutput1 codeOutput1 headerOutput1 compOutput1
 	diff freqOutput1 count/binary1.count
+
+test3: pa2
+	./pa2 original/woods freqOutput1 codeOutput1 headerOutput1 compOutput1
+	diff freqOutput1 count/woods.count
+
+test4: pa2
+	./pa2 original/stone freqOutput1 codeOutput1 headerOutput1 compOutput1
+	diff freqOutput1 count/stone.count
+
+test5: pa2
+	./pa2 original/lorum freqOutput1 codeOutput1 headerOutput1 compOutput1
+	diff freqOutput1 count/lorum.count
+
+test6: pa2
+	./pa2 original/empty freqOutput1 codeOutput1 headerOutput1 compOutput1
+	diff freqOutput1 count/empty.count
 	
 clean: # remove all machine generated files
 	rm -f *.o freqOutput? codeOutput? headerOutput?

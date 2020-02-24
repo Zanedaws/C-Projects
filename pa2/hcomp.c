@@ -5,6 +5,7 @@
 #include <stdint.h>
 #define ZERO 0
 
+//opens the file and reads it to an array of trees
 Tree** readFromFile(char* filename, Tree** forest, int* count)
 {
     FILE * fh = fopen(filename, "rb");
@@ -15,16 +16,18 @@ Tree** readFromFile(char* filename, Tree** forest, int* count)
         return 0;
     }
 
-    char tmp;
+    unsigned int tmp;
     int size = STARTSIZE;
+    int read = 0;
 
     while(!feof(fh))
     {
-        tmp = fgetc(fh);
+        read = fread(&tmp,1, 1, fh);
+        if(read == 0 && !feof(fh))
+            fprintf(stderr, "fread messed up\n");
         if(!feof(fh))
         {
             forest = addTree(forest, tmp, count, &size);
-            
         }
     }
 
@@ -35,6 +38,7 @@ Tree** readFromFile(char* filename, Tree** forest, int* count)
     return forest;
 }
 
+//adds a new tree to the forest that is passed to it and returns the new forest
 Tree** addTree(Tree** forest, char tmp, int* count, int* size)
 {
     Tree* newTree = malloc(sizeof(*newTree));
@@ -84,6 +88,7 @@ Tree** addTree(Tree** forest, char tmp, int* count, int* size)
     return forest;
 }
 
+//destroys the forest passed to it of size count
 Tree** destroyForest(Tree** forest, int count)
 {
     int i;
@@ -95,6 +100,7 @@ Tree** destroyForest(Tree** forest, int count)
     return NULL;
 }
 
+//destroys the tree using recursion
 void destroyTree(Tree* root)
 {
     if(root != NULL)
@@ -106,6 +112,7 @@ void destroyTree(Tree* root)
     root = NULL;
 }
 
+//sorts the forest passed to it using shell sort with values
 void sortForest(Tree** forest, int size)
 {
     //sequence value
@@ -155,6 +162,7 @@ void sortForest(Tree** forest, int size)
     return;
 }
 
+//outputs the frequency of the letters in the forest to the ouput file passed to it.
 int freqOutput(char* filename, Tree** forest, int size)
 {
 
@@ -209,6 +217,7 @@ int freqOutput(char* filename, Tree** forest, int size)
 
 //TREE BUILDING STARTS HERE---------------------------------------------------------------------------------------------------------------------
 
+//buids a huffman tree from the forest passed to it and returns the new forest where forest[0] is the full tree
 Tree** buildTree(Tree** forest, int* size)
 {
     while(*size > 1)
@@ -236,10 +245,11 @@ Tree** buildTree(Tree** forest, int* size)
         forest = shift(forest, size, 2);
         forest = insert(newRoot, forest, size);
         free(newRoot);
-    }   
+    }
     return forest;
 }
 
+//inserts a tree into a sorted forest for huffman compression
 Tree** insert(Tree* root, Tree** forest, int* size)
 {
 
@@ -265,6 +275,7 @@ Tree** insert(Tree* root, Tree** forest, int* size)
     return forest;
 }
 
+//shifts the indexes within a forest of size size by ammount to the left
 Tree** shift(Tree** forest, int* size, int ammount)
 {
     int i;
@@ -286,6 +297,7 @@ Tree** shift(Tree** forest, int* size, int ammount)
 
 //CODE OUTPUT START------------------------------------------------------------------------
 
+//prints the code of each character in the huffman tree
 void printCode(char* filename, Tree* root, Code** codeList)
 {
     FILE* fh = fopen(filename, "w");
@@ -296,6 +308,8 @@ void printCode(char* filename, Tree* root, Code** codeList)
     fclose(fh);
 }
 
+
+//gets the header of the huffman tree
 void getSequence(Tree* root, long seq, int depth, FILE* fh, Code** codeList, int* index)
 {
     if(root -> left == NULL && root -> right == NULL)
@@ -312,12 +326,13 @@ void getSequence(Tree* root, long seq, int depth, FILE* fh, Code** codeList, int
     seq = seq >> 1;
     depth--;
     depth++;
-    seq = (seq << 1) + 1;
+    seq = (seq << 1) | 1;
     getSequence(root -> right, seq, depth, fh, codeList, index);
     seq = seq >> 1;
     depth--;
 }
 
+//prints the header of the huffman tree
 void printSequence(long seq, int depth, FILE* fh, Code** codeList, int* index, char chr)
 {
     int i;
@@ -337,7 +352,7 @@ void printSequence(long seq, int depth, FILE* fh, Code** codeList, int* index, c
     
 }
 
-
+//destroys the Code** structure
 void destroyCodeList(Code** codeList, int size)
 {
     int i;
@@ -351,6 +366,7 @@ void destroyCodeList(Code** codeList, int size)
 
 //COMPRESSION CODE---------------------------------------------------------------------------
 
+//reads a file to compress it to an output writeFile
 void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root, long size)
 {
     int totalBits = 0;
@@ -411,6 +427,7 @@ void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root
     fwrite(&totalNumChar, sizeof(long), 1, writeFile);
 }
 
+//prints the compressed code of the file
 void printCompCode(Code** codeList, char key, FILE* writeFile, int* totalBits, int* bits, long size, long* totalNumChar)
 {
     
@@ -441,9 +458,10 @@ void printCompCode(Code** codeList, char key, FILE* writeFile, int* totalBits, i
 }
 
 
-
+//prints the number of characters in the original file
 void printNumChar(FILE* readFile, FILE* writeFile)
 {
+    fseek(readFile, 0, SEEK_SET);
     fseek(readFile, 0, SEEK_END);
     long numChar = ftell(readFile);
     fwrite(&numChar, sizeof(long), 1, writeFile);
@@ -458,7 +476,7 @@ void printHuffNum(FILE* writeFile, long size)
 
 void printHeaderInfo(FILE* writeFile, Tree* root, int* bits, int* totalBits, int* totalBytesAdded)
 {
-    if(root -> chr == '\0')
+    if(root -> left != NULL && root -> right != NULL)
     {
         *bits = *bits << 1; 
         *totalBits = *totalBits + 1;
@@ -528,7 +546,7 @@ int reverseByte(int bin)
 
 void printHeader(Tree* root, FILE* fh)
 {
-    if(root -> chr == '\0')
+    if(root -> left != NULL && root -> right != NULL)
     {
         fprintf(fh, "0");
         printHeader(root -> left, fh);

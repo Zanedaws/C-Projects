@@ -17,6 +17,13 @@ int main(int argc, char** argv)
 
     forest = readFromFile(argv[1], forest, &count);
 
+    if(count == 0)
+    {
+        fprintf(stderr, "file is empty\n");
+        free(forest);
+        return EXIT_FAILURE;
+    }
+
     int preBuildCount = count;
 
     int writCheck;
@@ -27,6 +34,13 @@ int main(int argc, char** argv)
         fprintf(stderr, "err in freqOutput.\n");
         return EXIT_FAILURE;
     }
+
+
+    // int i;
+    // for(i = 0; i < count; i++)
+    // {
+    //     fprintf(stderr, "chr = (%c)\tfreq = %ld\n", forest[i] -> chr, forest[i] -> freq);
+    // }
 
     Tree** rootForest = buildTree(forest, &count);
 
@@ -48,7 +62,7 @@ int main(int argc, char** argv)
     fclose(writeFile);
     fclose(readFile);
 
-    print2DUtil(rootForest[0], 0);
+    // print2DUtil(rootForest[0], 0);
 
     destroyCodeList(codeList, preBuildCount);
 
