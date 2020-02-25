@@ -13,6 +13,9 @@ pa2: $(OBJS)
 testmemory: pa2
 	$(VAL) --log-file=memcheck1.txt ./pa2 original/binary1 freqOutput1 codeOutput1 headerOutput1 compOutput1
 
+testall: test1 test2 test3 test4 test5
+	
+
 test1: pa2
 	./pa2 original/gophers freqOutput1 codeOutput1 headerOutput1 compOutput1
 	diff freqOutput1 count/gophers.count
@@ -38,10 +41,10 @@ test6: pa2
 	diff freqOutput1 count/empty.count
 	
 clean: # remove all machine generated files
-	rm -f *.o freqOutput? codeOutput? headerOutput?
+	rm -f *.o freqOutput? codeOutput? headerOutput? compOutput? memcheck?
 	
 zip:
-	zip pa2.zip *.c *.h
+	zip pa2.zip *.c *.h Makefile
 
 update:
 	git push -u https://Zanedaws:40002608Zanefunk@github.com/Zanedaws/ECE368.git master

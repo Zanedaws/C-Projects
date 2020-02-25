@@ -8,9 +8,9 @@
 //opens the file and reads it to an array of trees
 Tree** readFromFile(char* filename, Tree** forest, int* count)
 {
-    FILE * fh = fopen(filename, "rb");
+    FILE * fh = fopen(filename, "rb"); //opens file to be read
 
-    if(fh == NULL)
+    if(fh == NULL) //checks if file opens correctly
     {
         fprintf(stderr, "file failed to open\n");
         return 0;
@@ -20,20 +20,20 @@ Tree** readFromFile(char* filename, Tree** forest, int* count)
     int size = STARTSIZE;
     int read = 0;
 
-    while(!feof(fh))
+    while(!feof(fh)) //read through the file character by character
     {
         read = fread(&tmp,1, 1, fh);
         if(read == 0 && !feof(fh))
             fprintf(stderr, "fread messed up\n");
         if(!feof(fh))
         {
-            forest = addTree(forest, tmp, count, &size);
+            forest = addTree(forest, tmp, count, &size); //add the read letter to the forest
         }
     }
 
     fclose(fh);
 
-    sortForest(forest, *count);
+    sortForest(forest, *count); //call to sort the forest
 
     return forest;
 }
@@ -41,7 +41,9 @@ Tree** readFromFile(char* filename, Tree** forest, int* count)
 //adds a new tree to the forest that is passed to it and returns the new forest
 Tree** addTree(Tree** forest, char tmp, int* count, int* size)
 {
-    Tree* newTree = malloc(sizeof(*newTree));
+    Tree* newTree = malloc(sizeof(*newTree)); //allocate space for new tree root
+    
+    //initialize the new tree
     newTree ->  chr = tmp;
     newTree -> freq = 1;
     newTree -> left = NULL;
@@ -77,7 +79,7 @@ Tree** addTree(Tree** forest, char tmp, int* count, int* size)
     }
     else
     {
-        Tree** newForest = realloc(forest, sizeof(*forest) * (*size + *size/4));
+        Tree** newForest = realloc(forest, sizeof(*forest) * (*size + *size/4)); //realloc for size by 25% of array size
         *size = *size + *size/4;
         newForest[*count] = newTree;
         newForest[*count] = newTree;
@@ -92,11 +94,11 @@ Tree** addTree(Tree** forest, char tmp, int* count, int* size)
 Tree** destroyForest(Tree** forest, int count)
 {
     int i;
-    for(i = count - 1; i >= 0; i--)
+    for(i = count - 1; i >= 0; i--) // loops through the forest from the end to the beginning
     {
-        destroyTree(forest[i]);
+        destroyTree(forest[i]); //calls the destroy tree function on each tree
     }
-    free(forest);
+    free(forest); //frees the array pointer
     return NULL;
 }
 
@@ -166,29 +168,30 @@ void sortForest(Tree** forest, int size)
 int freqOutput(char* filename, Tree** forest, int size)
 {
 
-
-    FILE* fh = fopen(filename, "w");
+    FILE* fh = fopen(filename, "w"); //open the output file
     
-    if(fh == NULL)
+    if(fh == NULL) //check if opened correctly
     {
         fclose(fh);
         fprintf(stderr,"failed to open freqOutput file.\n");
         return EXIT_FAILURE;
     }
 
+    //indexing and temp variables
     int written;
     int i;
     int j;
     char current;
     long zero = ZERO;
-    for(i = 0; i < 256; i++)
+
+    for(i = 0; i < 256; i++)//loops through from 0 to 255 (inclusive) to check if the ascii character is in the tree
     {
         current = i;
-        for(j = 0; j < size; j++)
+        for(j = 0; j < size; j++)//loops through the whole list of characters to see if the current is in the list
         {
-            if(forest[j] -> chr == current)
+            if(forest[j] -> chr == current)//check if character is in the list
             {
-                written = fwrite(&(forest[j] -> freq), sizeof(long), 1, fh);
+                written = fwrite(&(forest[j] -> freq), sizeof(long), 1, fh); //write the frequency of the character to the binary file
                 if(written != 1)
                 {
                     fprintf(stderr, "error occurred when writing a frequency\n");
@@ -197,7 +200,7 @@ int freqOutput(char* filename, Tree** forest, int size)
                 }
             }
         }
-        if(written == 0)
+        if(written == 0) //if there is nothing written then write a zero to the output
         {
             written = fwrite(&(zero), sizeof(long), 1, fh);
             if(written != 1)
@@ -220,6 +223,7 @@ int freqOutput(char* filename, Tree** forest, int size)
 //buids a huffman tree from the forest passed to it and returns the new forest where forest[0] is the full tree
 Tree** buildTree(Tree** forest, int* size)
 {
+    //go through tree and pull lowest two nodes and make a new root with them as the left and right nodes
     while(*size > 1)
     {
         //initialize new root for tree
@@ -312,7 +316,7 @@ void printCode(char* filename, Tree* root, Code** codeList)
 //gets the header of the huffman tree
 void getSequence(Tree* root, long seq, int depth, FILE* fh, Code** codeList, int* index)
 {
-    if(root -> left == NULL && root -> right == NULL)
+    if(root -> left == NULL && root -> right == NULL) //if it is a leaf node
     {
         fprintf(fh, "%c:", root -> chr);
         printSequence(seq, depth - 1, fh, codeList, index, root -> chr);
@@ -320,19 +324,19 @@ void getSequence(Tree* root, long seq, int depth, FILE* fh, Code** codeList, int
         return;
     }
 
-    seq = seq << 1;
+    seq = seq << 1; //adds a zero to bit sequence
     depth += 1;
     getSequence(root -> left, seq, depth, fh, codeList, index);
     seq = seq >> 1;
     depth--;
     depth++;
-    seq = (seq << 1) | 1;
+    seq = (seq << 1) | 1; //adds a 1 to bit sequence
     getSequence(root -> right, seq, depth, fh, codeList, index);
     seq = seq >> 1;
     depth--;
 }
 
-//prints the header of the huffman tree
+//prints the sequence of the characters of the huffman tree and makes the code list
 void printSequence(long seq, int depth, FILE* fh, Code** codeList, int* index, char chr)
 {
     int i;
@@ -389,9 +393,9 @@ void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root
         totalBytesAdded++;
     }
     
-    fseek(writeFile, sizeof(long), SEEK_SET);
-    fwrite(&(totalBytesAdded), sizeof(long), 1, writeFile);
-    totalNumChar += sizeof(long);
+    fseek(writeFile, sizeof(long), SEEK_SET);//goes to the 9th byte of the file to save the first ones for a later write
+    fwrite(&(totalBytesAdded), sizeof(long), 1, writeFile);//prints the number of bytes in the header section of the file
+    totalNumChar += sizeof(long); //adds the long to the number of bytes
     printNumChar(readFile, writeFile); //prints the number of characters in uncompressed file
     totalNumChar = totalNumChar + sizeof(long); //add the long to the number of bytes
 
@@ -399,9 +403,10 @@ void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root
     bits = 0;
     totalBits = 0;
 
-    fseek(writeFile, 0, SEEK_END);
+    fseek(writeFile, 0, SEEK_END); //goes to the end of file to pring the compressed version of the file
 
     char tmp;
+    //reads each character of the original file
     while(!feof(readFile))
     {
         tmp = fgetc(readFile);
@@ -409,7 +414,7 @@ void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root
         if(!feof(readFile))
             printCompCode(codeList, tmp, writeFile, &totalBits, &bits, size, &totalNumChar);
     }
-    if(totalBits > 0)
+    if(totalBits > 0) //checks for any left over bits
     {
         while(totalBits < 8)
         {
@@ -421,10 +426,10 @@ void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root
         totalNumChar++;
     }
 
-    rewind(writeFile);
+    rewind(writeFile); //resets the writeFile pointer
 
-    totalNumChar += sizeof(long);
-    fwrite(&totalNumChar, sizeof(long), 1, writeFile);
+    totalNumChar += sizeof(long); //adds another long to the total bytes in the compressed file
+    fwrite(&totalNumChar, sizeof(long), 1, writeFile); //writes the total bytes in teh compressed file
 }
 
 //prints the compressed code of the file
@@ -432,6 +437,8 @@ void printCompCode(Code** codeList, char key, FILE* writeFile, int* totalBits, i
 {
     
     long i =0;
+
+    //find code in the code list
     while(i < size)
     {
         if(codeList[i] -> chr == key)
@@ -444,6 +451,7 @@ void printCompCode(Code** codeList, char key, FILE* writeFile, int* totalBits, i
         i++;
     }
     int tmp;
+    //check if the total bits in the bits to print are equal to or greater than 8 then print a byte to the file
     if(*totalBits >= 8)
     {
         tmp = *bits;
@@ -453,7 +461,6 @@ void printCompCode(Code** codeList, char key, FILE* writeFile, int* totalBits, i
         (*totalNumChar)++;
         fwrite(&tmp, 1, 1, writeFile);
         *totalBits = *totalBits - 8;
-        
     }
 }
 
@@ -468,12 +475,13 @@ void printNumChar(FILE* readFile, FILE* writeFile)
     rewind(readFile);
 }
 
+//prints the number of characters that the huffman tree shows
 void printHuffNum(FILE* writeFile, long size)
 {
     fwrite(&size, sizeof(long), 1, writeFile);
 }
 
-
+//prints the binary header to the compressed file
 void printHeaderInfo(FILE* writeFile, Tree* root, int* bits, int* totalBits, int* totalBytesAdded)
 {
     if(root -> left != NULL && root -> right != NULL)
@@ -524,6 +532,7 @@ void printHeaderInfo(FILE* writeFile, Tree* root, int* bits, int* totalBits, int
     }
 }
 
+//reverses the first byte in the given integer
 int reverseByte(int bin)
 {
 
@@ -543,7 +552,7 @@ int reverseByte(int bin)
 
 //HEADER CODE--------------------------------------------------------------------------------
 
-
+//prints the character header to the given output file
 void printHeader(Tree* root, FILE* fh)
 {
     if(root -> left != NULL && root -> right != NULL)
@@ -560,6 +569,8 @@ void printHeader(Tree* root, FILE* fh)
 
 
 //TESTING CODE-----------------------------------------------------------------------------
+
+//prints the given tree
 void printTree(Tree* root)
 {
     if(root == NULL)
@@ -578,6 +589,7 @@ void printTree(Tree* root)
     printTree(root -> right);
 }
 
+//prints the tree in 2D
 void print2DUtil(Tree *root, int space) 
 { 
     // Base case 
@@ -601,6 +613,7 @@ void print2DUtil(Tree *root, int space)
     print2DUtil(root->left, space); 
 } 
 
+//prints the binary code of a given integer for length number of bits
 void printBinary(int bin, int length)
 {
     int i;
