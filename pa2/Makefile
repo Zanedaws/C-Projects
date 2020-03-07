@@ -1,5 +1,5 @@
 GCC = gcc -std=c99 -Wall -Wshadow -Wvla -pedantic -O3 -g
-VAL = valgrind --dsymutil=yes --tool=memcheck --leak-check=full --verbose --show-leak-kinds=all --track-origins=yes
+VAL = valgrind --leak-check=full -s
 
 SRCS = pa2.c hcomp.c
 OBJS = $(SRCS:%.c=%.o)
@@ -11,7 +11,7 @@ pa2: $(OBJS)
 	$(GCC) -c $*.c
 
 testmemory: pa2
-	$(VAL) --log-file=memcheck1.txt ./pa2 original/binary1 freqOutput1 codeOutput1 headerOutput1 compOutput1
+	$(VAL) --log-file=memcheck1.txt ./pa2 original/gophers freqOutput1 codeOutput1 headerOutput1 compOutput1
 
 testall: test1 test2 test3 test4 test5
 	
@@ -41,7 +41,7 @@ test6: pa2
 	diff freqOutput1 count/empty.count
 	
 clean: # remove all machine generated files
-	rm -f *.o freqOutput? codeOutput? headerOutput? compOutput? memcheck?
+	rm -f *.o freqOutput? codeOutput? headerOutput? compOutput? memcheck?.txt
 	
 zip:
 	zip pa2.zip *.c *.h Makefile

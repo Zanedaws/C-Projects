@@ -405,6 +405,8 @@ void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root
 
     fseek(writeFile, 0, SEEK_END); //goes to the end of file to pring the compressed version of the file
 
+
+
     char tmp;
     //reads each character of the original file
     while(!feof(readFile))
