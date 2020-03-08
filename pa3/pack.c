@@ -1,5 +1,6 @@
 #include "pack.h"
 
+//reads the nodes from the input file into an array of nodes
 node** readNodes(char* filename, int* size)
 {
     FILE* fh = fopen(filename, "r");
@@ -9,7 +10,8 @@ node** readNodes(char* filename, int* size)
     strcpy(valueString, "");
 
     if(fh == NULL)
-    {
+    {   
+        free(nodes);
         fprintf(stderr, "failed ot open input file\n");
         return NULL;
     }
@@ -79,6 +81,7 @@ node** readNodes(char* filename, int* size)
     return nodes;
 }
 
+//adds a node to an array of nodes, reallocs if needed
 node** addNode(node** nodes, node* newNode, int* size, int* maxSize)
 {
     if(*size + 1 > *maxSize)
@@ -96,6 +99,7 @@ node** addNode(node** nodes, node* newNode, int* size, int* maxSize)
     return nodes;
 }
 
+//constructs a tree from an array of post order traversal nodes
 node* constTree(node** nodes, int* udx)
 {
     node* newRoot = nodes[(*udx)];
@@ -135,7 +139,7 @@ node* constTree(node** nodes, int* udx)
     return newRoot;
 }
 
-
+//prints the preorder traversal of a tree
 void printPre(node* root, FILE* writeFile)
 {
     if(root == NULL)
@@ -152,6 +156,7 @@ void printPre(node* root, FILE* writeFile)
     printPre(root -> right, writeFile);
 }
 
+//prints the dimensions of all the nodes in the tree
 void printDim(node* root, FILE* writeFile)
 {
     if(root == NULL)
@@ -168,6 +173,7 @@ void printDim(node* root, FILE* writeFile)
     }
 }
 
+//prints the packing of the tree
 void printPack(node* root, FILE* writeFile, int xpos, int ypos)
 {
     if(root == NULL)
@@ -193,6 +199,7 @@ void printPack(node* root, FILE* writeFile, int xpos, int ypos)
     }
 }
 
+//destroys the binary tree
 node* destroyTree(node* root)
 {
     if(root == NULL)
