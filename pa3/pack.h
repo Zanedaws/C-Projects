@@ -14,3 +14,13 @@ typedef struct TNode{
 
 node** readNodes(char* filename, int* size);
 node** addNode(node** nodes, node* newNode, int* size, int* maxSize);
+
+node* constTree(node** nodes, int* udx);
+
+void printPre(node* root, FILE* writeFile);
+
+void printDim(node* root, FILE* writeFile);
+
+void printPack(node* root, FILE* writeFile, int xpos, int ypos);
+
+node* destroyTree(node* root);

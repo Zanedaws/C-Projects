@@ -1,50 +1,32 @@
 GCC = gcc -std=c99 -Wall -Wshadow -Wvla -pedantic -O3 -g
-VAL = valgrind --leak-check=full -s
+VAL = valgrind --leak-check=full -s --leak-check=full --show-leak-kinds=all
 
-SRCS = pa2.c hcomp.c
+SRCS = pa3.c pack.c
 OBJS = $(SRCS:%.c=%.o)
 
-pa2: $(OBJS)
-	$(GCC) $(OBJS) -o pa2
+pa3: $(OBJS)
+	$(GCC) $(OBJS) -o pa3
 	
 .c.o:
 	$(GCC) -c $*.c
 
-testmemory: pa2
-	$(VAL) --log-file=memcheck1.txt ./pa2 original/gophers freqOutput1 codeOutput1 headerOutput1 compOutput1
+testmemory: pa3
+	$(VAL) --log-file=memcheck1.txt ./pa3 examples/3.po out1.pr out1.dim out1.pck
 
 testall: test1 test2 test3 test4 test5
 	
 
-test1: pa2
-	./pa2 original/gophers freqOutput1 codeOutput1 headerOutput1 compOutput1
-	diff freqOutput1 count/gophers.count
-
-test2: pa2
-	./pa2 original/binary1 freqOutput1 codeOutput1 headerOutput1 compOutput1
-	diff freqOutput1 count/binary1.count
-
-test3: pa2
-	./pa2 original/woods freqOutput1 codeOutput1 headerOutput1 compOutput1
-	diff freqOutput1 count/woods.count
-
-test4: pa2
-	./pa2 original/stone freqOutput1 codeOutput1 headerOutput1 compOutput1
-	diff freqOutput1 count/stone.count
-
-test5: pa2
-	./pa2 original/lorum freqOutput1 codeOutput1 headerOutput1 compOutput1
-	diff freqOutput1 count/lorum.count
-
-test6: pa2
-	./pa2 original/empty freqOutput1 codeOutput1 headerOutput1 compOutput1
-	diff freqOutput1 count/empty.count
+test1: pa3
+	./pa3 examples/3.po out1.pr out1.dim out1.pck
+	diff examples/3.pr out1.pr
+	diff examples/3.dim out1.dim
+	diff examples/3.pck out1.pck
 	
 clean: # remove all machine generated files
-	rm -f *.o freqOutput? codeOutput? headerOutput? compOutput? memcheck?.txt
+	rm -f *.o out?.pr out?.dim out?.pck
 	
 zip:
-	zip pa2.zip *.c *.h Makefile
+	zip pa3.zip *.c *.h Makefile
 
 update:
 	git push -u https://Zanedaws:40002608Zanefunk@github.com/Zanedaws/ECE368.git master
