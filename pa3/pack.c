@@ -7,6 +7,7 @@ node** readNodes(char* filename, int* size)
     node** nodes = malloc(sizeof(*nodes) * 40);
     int maxSize = 40;
     char valueString[50];
+    char toAdd[1];
     strcpy(valueString, "");
 
     if(fh == NULL)
@@ -36,32 +37,35 @@ node** readNodes(char* filename, int* size)
             else
             {
                 node* newNode = malloc(sizeof(*newNode));
-                strncat(valueString, &current, 1);
+		strncpy(toAdd, &current, 1);                  
+		strncat(valueString, toAdd, 1);
                 while(current != '(')
                 {
                     current = fgetc(fh);
                     if(current != '(')
-                        strncat(valueString, &current, 1);
+                        strncat(valueString, toAdd, 1);
                 }
                 newNode->label = atoi(valueString);
                 strcpy(valueString, "");
                 current = fgetc(fh);
-                strncat(valueString, &current, 1);
+		strncpy(toAdd, &current, 1);
+                strncat(valueString, toAdd, 1);
                 while(current != ',')
                 {
                     current = fgetc(fh);
                     if(current != ',')
-                        strncat(valueString, &current, 1);
+                        strncat(valueString, toAdd, 1);
                 }
                 newNode->width = atoi(valueString);
                 strcpy(valueString, "");
                 current = fgetc(fh);
-                strncat(valueString, &current, 1);
+		strncpy(toAdd, &current, 1);
+                strncat(valueString, toAdd, 1);
                 while(current != ')')
                 {
                     current = fgetc(fh);
                     if(current != ')')
-                        strncat(valueString, &current, 1);
+                        strncat(valueString, toAdd, 1);
                 }
                 newNode->height = atoi(valueString);
                 strcpy(valueString, "");
