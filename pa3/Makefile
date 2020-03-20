@@ -1,5 +1,5 @@
-GCC = gcc -std=c99 -Wall -Wshadow -Wvla -pedantic -O3 -g
-VAL = valgrind --leak-check=full -s --leak-check=full --show-leak-kinds=all
+GCC = gcc -std=c99 -Wall -Wshadow -Wvla -pedantic -O3
+VAL = valgrind --leak-check=full --leak-check=full --show-leak-kinds=all
 
 SRCS = pa3.c pack.c
 OBJS = $(SRCS:%.c=%.o)
@@ -11,7 +11,7 @@ pa3: $(OBJS)
 	$(GCC) -c $*.c
 
 testmemory: pa3
-	$(VAL) --log-file=memcheck1.txt ./pa3 examples/1K.po out1.pr out1.dim out1.pck
+	$(VAL) --log-file=memcheck1.txt ./pa3 examples/empty.po out1.pr out1.dim out1.pck
 
 testall: test1 test2 test3 test4 test5
 	
@@ -36,6 +36,9 @@ test4: pa3
 
 test5: pa3
 	./pa3 examples/1K.po out5.pr out5.dim out5.pck
+
+testEmpty: pa3
+	./pa3 examples/empty.po outEmpty.pr outEmpty.dim outEmpty.pck
 	
 clean: # remove all machine generated files
 	rm -f *.o out?.pr out?.dim out?.pck

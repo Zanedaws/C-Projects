@@ -11,6 +11,13 @@ int main(int argc, char** argv)
     int size = 0;
     node** nodes = readNodes(argv[1], &size);
 
+    if(size == 0)
+	{
+		free(nodes);
+		fprintf(stderr, "input file is empty\n");
+		return EXIT_FAILURE;
+	}
+
     if(nodes == NULL)
         return EXIT_FAILURE;
 
