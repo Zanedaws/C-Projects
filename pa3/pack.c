@@ -16,66 +16,50 @@ node** readNodes(char* filename, int* size)
         return NULL;
     }
 
-    char current = fgetc(fh);
+    char test = fgetc(fh);
+    char type;
+    int label;
+    int width;
+    int height;
+    int read;
 
     while(!feof(fh))
     {
-        if(current != '\n' && !feof(fh))
+        if(test == 'H' || test == 'V')
         {
-            if(current == 'H' || current == 'V')
+            node* newNode = malloc(sizeof(*newNode));
+            fseek(fh, -1, SEEK_CUR);
+            read = fscanf(fh, "%c\n", &type);
+            if(read != 1)
             {
-                node* newNode = malloc(sizeof(*newNode));
-                newNode->type = current == 'H' ? 'H' : 'V';
-                newNode->label = -1;
-                newNode->left = NULL;
-                newNode->right = NULL;
-                newNode->height = 0;
-                newNode->width = 0;
-                nodes = addNode(nodes, newNode, size, &maxSize);
+                fprintf(stderr, "failed fscanf for H or V\n");
             }
-            else
-            {
-                node* newNode = malloc(sizeof(*newNode));
-                strncat(valueString, &current, 1);
-                while(current != '(')
-                {
-                    current = fgetc(fh);
-                    if(current != '(')
-                        strncat(valueString, &current, 1);
-                }
-                newNode->label = atoi(valueString);
-                strcpy(valueString, "");
-                current = fgetc(fh);
-                strncat(valueString, &current, 1);
-                while(current != ',')
-                {
-                    current = fgetc(fh);
-                    if(current != ',')
-                        strncat(valueString, &current, 1);
-                }
-                newNode->width = atoi(valueString);
-                strcpy(valueString, "");
-                current = fgetc(fh);
-                strncat(valueString, &current, 1);
-                while(current != ')')
-                {
-                    current = fgetc(fh);
-                    if(current != ')')
-                        strncat(valueString, &current, 1);
-                }
-                newNode->height = atoi(valueString);
-                strcpy(valueString, "");
-                while(current != '\n')
-                    current = fgetc(fh);
-
-                newNode->type = 'L';
-                newNode->left = NULL;
-                newNode->right = NULL;
-                nodes = addNode(nodes, newNode, size, &maxSize);
-            }
+            newNode->type = type == 'H' ? 'H' : 'V';
+            newNode->label = -1;
+            newNode->left = NULL;
+            newNode->right = NULL;
+            newNode->height = 0;
+            newNode->width = 0;
+            nodes = addNode(nodes, newNode, size, &maxSize);
         }
-
-        current = fgetc(fh);
+        else
+        {
+            node* newNode = malloc(sizeof(*newNode));
+            fseek(fh, -1, SEEK_CUR);
+            read = fscanf(fh, "%d(%d,%d)\n", &label, &width, &height);
+            if(read != 3)
+            {
+                fprintf(stderr, "failed fscanf for leaf node\n");
+            }
+            newNode->type = type = 'L';
+            newNode->label = label;
+            newNode->left = NULL;
+            newNode->right = NULL;
+            newNode->height = height;
+            newNode->width = width;
+            nodes = addNode(nodes, newNode, size, &maxSize);
+        }
+        test = fgetc(fh);
     }
     fclose(fh);
     return nodes;

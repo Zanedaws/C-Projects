@@ -11,7 +11,6 @@ typedef struct TNode{
     struct TNode* right;
 }node;
 
-
 node** readNodes(char* filename, int* size);
 node** addNode(node** nodes, node* newNode, int* size, int* maxSize);
 
