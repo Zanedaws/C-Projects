@@ -22,7 +22,7 @@ clean: # remove all machine generated files
 	rm -f *.o memcheck1.txt pa4
 	
 zip:
-	zip pa4.zip *.c *.h Makefile
+	zip pa4.zip *.c *.h Makefile treeOutput?
 
 update:
 	git push -u https://Zanedaws:40002608Zanefunk@github.com/Zanedaws/ECE368.git master
