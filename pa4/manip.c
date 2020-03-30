@@ -201,30 +201,19 @@ void printTreeOutput (Tnode* root, FILE* writeFile)
         return;
 
 
-    fprintf(writeFile, "%d %d\n", root -> key, root -> balance);
+    char code = 0;
 
-    //fprintf(stderr, "root key: %d\n", root -> key);
-    // char code = 0x00;
-    // fwrite(&(root -> key), sizeof(int), 1, writeFile);
-    // if(root -> left == NULL && root -> right == NULL)
-    // {
-    //     fwrite(&code, sizeof(char), 1, writeFile);
-    // }
-    // else if(root -> left != NULL && root -> right == NULL)
-    // {
-    //     code = code | 0x01;
-    //     fwrite(&code, sizeof(char), 1, writeFile);
-    // }
-    // else if(root -> left == NULL && root -> right != NULL)
-    // {
-    //     code = code | 0x02;
-    //     fwrite(&code, sizeof(char), 1, writeFile);
-    // }
-    // else
-    // {
-    //     code = code | 0x03;
-    //     fwrite(&code, sizeof(char), 1, writeFile);
-    // }
+    
+
+    fwrite(&(root -> key), sizeof(int), 1, writeFile);
+    if(root -> left != NULL || root -> right != NULL)
+    {
+        code = root -> left != NULL ? code | 2 : code | 0;
+        code = root -> right != NULL ? code | 1 : code | 0;
+    }
+    fwrite(&(code), sizeof(char), 1, writeFile);
+
+    fprintf(stderr, "%d %d\n", root -> key, code);
 
     printTreeOutput(root -> left, writeFile);
     printTreeOutput(root -> right, writeFile);
