@@ -84,10 +84,12 @@ Tnode* deleteKey(Tnode* root, Tnode* previous, int keyDelete)
         
         root -> key = temp -> key;
 
-        root -> right = deleteKey(root -> right, previous, temp -> key);
+        root -> left = deleteKey(root -> left, previous, temp -> key);
         getBalanceNS(root);
         root = balance(root, previous);
     }
+    getBalanceNS(root);
+    root = balance(root, previous);
     return root;
 }
 
@@ -223,67 +225,3 @@ void printTree (Tnode* root)
     return;
 }
 
-
-
-// Tnode* current = root;
-    // Tnode* previous = NULL;
-    // Tnode* toBalance = root;
-    // Tnode* preToBalance = NULL;
-    // while(current != NULL)
-    // {
-    //     if(current -> balance != 0)
-    //     {
-    //         preToBalance = previous;
-    //         toBalance = current;
-    //     }
-
-    //     previous = current;
-
-    //     if(toInsert <= current -> key)
-    //     {
-    //         fprintf(stderr, "\tmove left\n");
-    //         current = current -> left;
-    //     }
-    //     else
-    //     {
-    //         fprintf(stderr, "\tmove right\n");
-    //         current = current -> right;
-    //     }
-    //     if(current == NULL)
-    //     {
-    //         previous -> balance = previous -> key < toInsert ? previous -> balance - 1 : previous -> balance + 1;
-    //     }
-    //     else if(current -> balance == 0)
-    //     {
-    //         previous -> balance = previous -> key < toInsert ? (previous -> balance) - 1 : (previous -> balance) + 1;
-    //     }
-        
-    // }
-
-
-    // if(current == root)
-    // {
-    //     current = malloc(sizeof(*current));
-    //     current -> key = toInsert;
-    //     current -> left = NULL;
-    //     current -> right = NULL;
-    //     current -> balance = 0;
-    //     return current;
-    // }
-
-    // current = malloc(sizeof(*current));
-    // if(toInsert <= previous -> key)
-    //     previous -> left = current;
-    // else 
-    //     previous -> right = current;
-    // current -> key = toInsert;
-    // current -> left = NULL;
-    // current -> right = NULL;
-    // current -> balance = 0;
-
-    // if(toBalance == root)
-    //     root = balance(root, preToBalance);
-    // else
-    //     toBalance = balance(toBalance, preToBalance);
-    
-    // return root;
