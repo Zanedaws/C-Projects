@@ -25,7 +25,10 @@ int evaluate(char* filename, Tnode* root)
     destroyTree(root);
     fclose(fh);
     
-    return EXIT_SUCCESS;
+    if(formatScore == 1)
+        return EXIT_SUCCESS;
+    else
+        return EXIT_FAILURE;
 }
 
 //gets the balance of each node in the tree
@@ -58,8 +61,8 @@ void getBalanceNS(Tnode* root)
     int rightHeight = getHeight(root -> right);
 
     int balance = leftHeight - rightHeight;
-    fprintf(stderr, "balance\n");
     root -> balance = balance;
+    
     return;
 }
 
@@ -69,7 +72,7 @@ int getHeight(Tnode* root)
 {
     if(root == NULL)
         return 0;
-
+    
     int heightLeft = getHeight(root -> left);
     int heightRight = getHeight(root -> right);
 
@@ -83,7 +86,6 @@ void bstEval(Tnode* root, int* bstScore)
     {
         return;
     }
-    // fprintf(stderr, "root -> key: %d\n", root -> key);
     if(root -> left != NULL)
     {
         *bstScore = (root -> left) -> key <= root -> key ? (*bstScore) : 0; 

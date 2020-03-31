@@ -1,58 +1,49 @@
 #include "manip.h"
 #include "hbt.h"
 #include "pa4.h"
+#include "build.h"
 
 //inserts a key into the BST and balances it
-Tnode* insertKey(Tnode* root, int toInsert)
+Tnode* insertKey(Tnode* root, Tnode* previous, int toInsert)
 {   
-    Tnode* current = root;
-    Tnode* previous = NULL;
-    Tnode* toBalance = root;
-    Tnode* preToBalance = NULL;
-    while(current != NULL)
+    if(root == NULL)
     {
-        if(current -> balance != 0)
+        Tnode* newRoot = malloc(sizeof(*newRoot));
+        newRoot -> balance = 0;
+        newRoot -> key = toInsert;
+        newRoot -> left = NULL;
+        newRoot -> right = NULL;
+        return newRoot;
+    }
+        
+    if(toInsert > root -> key)
+    {
+        fprintf(stderr, "\n");
+        root -> right = insertKey(root -> right, root, toInsert);
+        getBalanceNS(root);
+        if(root -> balance < -1 || root -> balance > 1)
         {
-            preToBalance = previous;
-            toBalance = current;
+            root = balance(root, previous);
         }
-
-        previous = current;
-        current = toInsert <= current -> key ? current -> left : current -> right;
-
-        if(current == NULL || current -> balance == 0)
+        return root;
+    }
+    if(toInsert <= root -> key)
+    {
+        fprintf(stderr, "\n");
+        root -> left = insertKey(root -> left, root, toInsert);
+        getBalanceNS(root);
+        if(root -> balance < -1 || root -> balance > 1)
         {
-            previous -> balance = previous -> right == current ? (previous -> balance) - 1 : (previous -> balance) + 1;
+
+            root = balance(root, previous);
+
         }
+        return root;
     }
 
+    // fprintf(stderr, "something odd happened\n");
 
-    if(current == root)
-    {
-        current = malloc(sizeof(*current));
-        current -> key = toInsert;
-        current -> left = NULL;
-        current -> right = NULL;
-        current -> balance = 0;
-        return current;
-    }
-
-    current = malloc(sizeof(*current));
-    if(toInsert < previous -> key)
-        previous -> left = current;
-    else 
-        previous -> right = current;
-    current -> key = toInsert;
-    current -> left = NULL;
-    current -> right = NULL;
-    current -> balance = 0;
-
-    if(toBalance == root)
-        root = balance(root, preToBalance);
-    else
-        toBalance = balance(toBalance, preToBalance);
-
-    return root;
+    return NULL;
 }
 
 //deletes key from the BST and balances it
@@ -60,68 +51,53 @@ Tnode* deleteKey(Tnode* root, Tnode* previous, int keyDelete)
 {
     if(root == NULL)
         return NULL;
-
-    fprintf(stderr, "delete key: %d\n", keyDelete);
-    printTree(root);
-    fprintf(stderr, "\n");
-    if(root -> key < keyDelete)
+    
+    if(keyDelete < root -> key)
+    {
+        root -> left = deleteKey(root -> left, root, keyDelete);
+        getBalanceNS(root);
+        root = balance(root, previous);
+    }
+    else if(keyDelete > root -> key)
     {
         root -> right = deleteKey(root -> right, root, keyDelete);
         getBalanceNS(root);
-        if(root -> balance < -1 || root -> balance > 1)
-        {
-            root = balance(root, previous);
-        }
-        return root;
-    }
-    else if(root -> key > keyDelete)
-    {
-        root -> right = deleteKey(root -> left, root, keyDelete);
-        getBalanceNS(root);
-        if(root -> balance < -1 || root -> balance > 1)
-        {
-            root = balance(root, previous);
-        }
-        return root;
-    }
-    
-    if(root -> left != NULL && root -> right != NULL)
-    {
-        Tnode* newRoot = root -> left;
-        Tnode* prePred = root;
-        while(newRoot -> right != NULL)
-        {
-            prePred = newRoot;
-            newRoot = newRoot -> right;
-        }
-        Tnode* temp;
-        temp = root -> left;
-        root -> left = newRoot -> left;
-        newRoot -> left = temp;
-        newRoot -> right = root -> right;
-        prePred -> right = root -> left;
-        free(root);
-        prePred -> balance = prePred -> balance + 1;
-        return newRoot;
-    }
-    else if(root -> left != NULL && root -> right == NULL)
-    {
-        Tnode* temp = root -> left;
-        free(root);
-        return temp;
-    }
-    else if(root -> left == NULL && root -> right != NULL)
-    {
-        Tnode* temp = root -> right;
-        free(root);
-        return temp;
+        root = balance(root, previous);
     }
     else
     {
-        free(root);
-        return NULL;
-    }
+        if(root -> left == NULL)
+        {
+            Tnode* temp = root -> right;
+            free(root);
+            return temp;
+        }
+        else if(root -> right == NULL)
+        {
+            Tnode* temp = root -> left;
+            free(root);
+            return temp;
+        }
+    
 
+        Tnode* temp = getPred(root -> left);
+        
+        root -> key = temp -> key;
+
+        root -> right = deleteKey(root -> right, previous, temp -> key);
+        getBalanceNS(root);
+        root = balance(root, previous);
+    }
+    return root;
+}
+
+//gets inorder predecessor
+Tnode* getPred(Tnode* root)
+{
+    while(root -> right != NULL)
+    {
+        root = root -> right;
+    }
     return root;
 }
 
@@ -129,14 +105,17 @@ Tnode* deleteKey(Tnode* root, Tnode* previous, int keyDelete)
 Tnode* balance(Tnode* root, Tnode* previous)
 {
     printTree(root);
-    fprintf(stderr, "\n");
+ fprintf(stderr, "\n");
     if(root -> balance > 1)
     {
+
         root = clkRot(root, previous);
     }
     else if(root -> balance < -1)
     {
+
         root = cntClkRot(root, previous);
+
     }
     printTree(root);
     fprintf(stderr, "\n");
@@ -148,8 +127,15 @@ Tnode* clkRot(Tnode* root, Tnode* previous)
 {
     Tnode* newRoot;
     if((root -> left) -> balance < 0)
-        root = cntClkRot(root -> left, root);
-
+    {
+        newRoot = (root -> left) -> right;
+        Tnode* temp = root -> left;
+        root -> left = newRoot;
+        temp -> right = newRoot -> left;
+        newRoot -> left = temp;
+        getBalanceNS(newRoot);
+        getBalanceNS(temp);
+    }
     newRoot = root -> left;
 
     root -> left = newRoot -> right;
@@ -162,8 +148,8 @@ Tnode* clkRot(Tnode* root, Tnode* previous)
             previous -> left = newRoot;
     }
 
-    root -> balance = root -> balance - 2;
-    newRoot -> balance = newRoot -> balance - 1;
+    getBalanceNS(root);
+    getBalanceNS(newRoot);
 
     return newRoot;
 }
@@ -173,12 +159,20 @@ Tnode* cntClkRot(Tnode* root, Tnode* previous)
 {
     Tnode* newRoot;
     if((root -> right) -> balance > 0)
-        root = clkRot(root -> right, root);
-    
-    newRoot = root -> right;
+    {
+        newRoot = (root -> right) -> left;
+        Tnode* temp = root -> right;
+        root -> right = newRoot;
+        temp -> left = newRoot -> right;
+        newRoot -> right = temp;
+        getBalanceNS(newRoot);
+        getBalanceNS(temp);
+    }
 
+    newRoot = root -> right;
     root -> right = newRoot -> left;
     newRoot -> left = root;
+
     if(previous != NULL)
     {
         if(previous -> right == root)
@@ -203,8 +197,6 @@ void printTreeOutput (Tnode* root, FILE* writeFile)
 
     char code = 0;
 
-    
-
     fwrite(&(root -> key), sizeof(int), 1, writeFile);
     if(root -> left != NULL || root -> right != NULL)
     {
@@ -212,8 +204,6 @@ void printTreeOutput (Tnode* root, FILE* writeFile)
         code = root -> right != NULL ? code | 1 : code | 0;
     }
     fwrite(&(code), sizeof(char), 1, writeFile);
-
-    fprintf(stderr, "%d %d\n", root -> key, code);
 
     printTreeOutput(root -> left, writeFile);
     printTreeOutput(root -> right, writeFile);
@@ -232,3 +222,68 @@ void printTree (Tnode* root)
     printTree(root -> right);
     return;
 }
+
+
+
+// Tnode* current = root;
+    // Tnode* previous = NULL;
+    // Tnode* toBalance = root;
+    // Tnode* preToBalance = NULL;
+    // while(current != NULL)
+    // {
+    //     if(current -> balance != 0)
+    //     {
+    //         preToBalance = previous;
+    //         toBalance = current;
+    //     }
+
+    //     previous = current;
+
+    //     if(toInsert <= current -> key)
+    //     {
+    //         fprintf(stderr, "\tmove left\n");
+    //         current = current -> left;
+    //     }
+    //     else
+    //     {
+    //         fprintf(stderr, "\tmove right\n");
+    //         current = current -> right;
+    //     }
+    //     if(current == NULL)
+    //     {
+    //         previous -> balance = previous -> key < toInsert ? previous -> balance - 1 : previous -> balance + 1;
+    //     }
+    //     else if(current -> balance == 0)
+    //     {
+    //         previous -> balance = previous -> key < toInsert ? (previous -> balance) - 1 : (previous -> balance) + 1;
+    //     }
+        
+    // }
+
+
+    // if(current == root)
+    // {
+    //     current = malloc(sizeof(*current));
+    //     current -> key = toInsert;
+    //     current -> left = NULL;
+    //     current -> right = NULL;
+    //     current -> balance = 0;
+    //     return current;
+    // }
+
+    // current = malloc(sizeof(*current));
+    // if(toInsert <= previous -> key)
+    //     previous -> left = current;
+    // else 
+    //     previous -> right = current;
+    // current -> key = toInsert;
+    // current -> left = NULL;
+    // current -> right = NULL;
+    // current -> balance = 0;
+
+    // if(toBalance == root)
+    //     root = balance(root, preToBalance);
+    // else
+    //     toBalance = balance(toBalance, preToBalance);
+    
+    // return root;

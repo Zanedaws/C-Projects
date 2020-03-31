@@ -31,6 +31,12 @@ int main(int argc, char** argv)
 
         FILE* fh = fopen(argv[2], "rb");
 
+        if(fh == NULL)
+        {
+            fprintf(stdout, "%d\n", -1);
+            return EXIT_FAILURE;
+        }
+
         Tnode* root = NULL;
 
         buildFromOpsCheck = buildFromOps(fh, root, argv[3]);
@@ -43,6 +49,7 @@ int main(int argc, char** argv)
         fclose(fh);
     }
 
+    fprintf(stdout, "%d\n", 1);
     return EXIT_SUCCESS;
 
 }

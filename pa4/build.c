@@ -49,43 +49,57 @@ int buildFromOps(FILE* fh, Tnode* root, char* outputFile)
     int key;
     char op;
     int read;
-
+    FILE* writeFile = fopen(outputFile, "wb");
     while(!feof(fh))
     {
             read = fread(&key, sizeof(int), 1, fh);
             if(read != 1 && !feof(fh))
             {
-                fprintf(stderr, "failed to read key in BFO\nread: %d\n", read);
+                fprintf(stdout, "%d\n", 0);
+                printTreeOutput(root, writeFile);
                 return EXIT_FAILURE;
             }
 
             read = fread(&op, sizeof(char), 1, fh);
             if(read != 1 && !feof(fh))
             {
-                fprintf(stderr, "failed to read op on BFO\nread: %d\n", read);
+                fprintf(stdout, "%d\n", 0);
+                printTreeOutput(root, writeFile);
                 return EXIT_FAILURE;
             }
             
             if(!feof(fh))
-            {
+            {     
+                
                 if(op == 'i')
-                    root = insertKey(root, key);
+                {
+                    Tnode* previous = NULL;
+                    fprintf(stderr, "\ninsert: %d\n", key);
+                    root = insertKey(root, previous, key);
+                    fprintf(stderr, "post insertKey call\n");
+                    printTree(root);
+                    fprintf(stderr, "\n");
+                }
                 if(op == 'd')
                 {
                     Tnode* previous = NULL;
+                    fprintf(stderr, "pre deleteKey call: %d\n", key);
+                    printTree(root);
+                    fprintf(stderr, "\n");
                     root = deleteKey(root, previous, key);
+                    fprintf(stderr, "post deleteKey call\n");
+                    printTree(root);
+                    fprintf(stderr, "\n");
+                    
                 }
             }
     }
 
-    FILE* writeFile = fopen(outputFile, "wb");
-
-    fprintf(stderr, "post BFO\n\n");
-    printTree(root);
-
     printTreeOutput(root, writeFile);
 
     fclose(writeFile);
+
+    // printTree(root);
 
     destroyTree(root);
 
