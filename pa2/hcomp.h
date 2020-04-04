@@ -66,7 +66,7 @@ void readToCompress(FILE* readFile, char* writeFile, Code** codeList, Tree* root
 void printCompCode(Code** codeList, char key, FILE* writeFile, int* totalBits, int* bits, long size, long* totalNumChar);
 
 //prints the number of characters in the original file
-void printNumChar(FILE* readFile, FILE* writeFile);
+long printNumChar(FILE* readFile);
 
 //prints the number of characters that the huffman tree shows
 void printHuffNum(FILE* writeFIle, long size);

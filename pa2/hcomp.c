@@ -380,13 +380,6 @@ void readToCompress(FILE* readFile, char* writeName, Code** codeList, Tree* root
 
     FILE* writeFile = fopen(writeName, "w");
 
-    long spacer = 0;
-
-
-    int i = 0;
-    for(i = 0; i < 3; i++)
-        fwrite(&spacer, sizeof(long), 1, writeFile);
-
     // fseek(writeFile, sizeof(long) * 3, SEEK_SET);
     printHeaderInfo(writeFile, root, &bits, &totalBits, &totalBytesAdded); //prints the tree topology to the file
    
@@ -401,21 +394,38 @@ void readToCompress(FILE* readFile, char* writeName, Code** codeList, Tree* root
         fwrite(&bits, 1, 1, writeFile);
         totalBytesAdded++;
     }
+
+    fclose(writeFile);
+    writeFile = fopen(writeName, "r");
+
+    char* headerInfo = malloc(sizeof(*headerInfo) * totalBytesAdded);
+
+    int i = 0;
+    for(i = 0; i < totalBytesAdded; i++)
+    {
+        headerInfo[i] = fgetc(writeFile);
+    }
+
+    long headerInfoSize = totalBytesAdded;
+
+    fprintf(stderr, "%ld\n", headerInfoSize);
     
-    fseek(writeFile, sizeof(long), SEEK_SET);//goes to the 9th byte of the file to save the first ones for a later write
-    fwrite(&(totalBytesAdded), sizeof(long), 1, writeFile);//prints the number of bytes in the header section of the file
+    fclose(writeFile);
+    writeFile = fopen(writeName, "w");
+    
+    // fseek(writeFile, sizeof(long), SEEK_SET);//goes to the 9th byte of the file to save the first ones for a later write
+    // fwrite(&(totalBytesAdded), sizeof(long), 1, writeFile);//prints the number of bytes in the header section of the file
     totalNumChar += sizeof(long); //adds the long to the number of bytes
-    printNumChar(readFile, writeFile); //prints the number of characters in uncompressed file
+    long numCharOrig = printNumChar(readFile); //prints the number of characters in uncompressed file
     totalNumChar = totalNumChar + sizeof(long); //add the long to the number of bytes
 
     totalNumChar += totalBytesAdded;
     bits = 0;
     totalBits = 0;
 
-    fclose(writeFile);
-    writeFile = fopen(writeName, "a"); //goes to the end of file to pring the compressed version of the file
-
-
+    // fseek(writeFile, 0, SEEK_END);
+    // fclose(writeFile);
+    // writeFile = fopen(writeName, "a"); //goes to the end of file to pring the compressed version of the file
 
     char tmp;
     //reads each character of the original file
@@ -438,12 +448,46 @@ void readToCompress(FILE* readFile, char* writeName, Code** codeList, Tree* root
         totalNumChar++;
     }
 
-    rewind(writeFile); //resets the writeFile pointer
+    fclose(writeFile);
+    writeFile = fopen(writeName, "r");
+
+    char* compCode = malloc(sizeof(char) * totalNumChar);
+
+    i = 0;
+    char tmpChar;
+    while(!feof(writeFile))
+    {
+
+        tmpChar = fgetc(writeFile);
+        if(!feof(writeFile))
+        {
+            compCode[i] = tmpChar;
+            i++;
+        }    
+    }
+
+    int compCodeSize = i;
+
+    fclose(writeFile);
+    writeFile = fopen(writeName, "w");
+
+    // rewind(writeFile); //resets the writeFile pointer
 
     totalNumChar += sizeof(long); //adds another long to the total bytes in the compressed file
     fwrite(&totalNumChar, sizeof(long), 1, writeFile); //writes the total bytes in teh compressed file
 
+    fwrite(&headerInfoSize, sizeof(long), 1, writeFile);
+
+    fwrite(&numCharOrig, sizeof(long), 1, writeFile);
+    
+    fwrite(headerInfo, sizeof(char), headerInfoSize, writeFile);
+
+    fwrite(compCode, sizeof(char), compCodeSize, writeFile);
+
     fclose(writeFile);
+
+    free(headerInfo);
+    free(compCode);
 }
 
 //prints the compressed code of the file
@@ -480,13 +524,13 @@ void printCompCode(Code** codeList, char key, FILE* writeFile, int* totalBits, i
 
 
 //prints the number of characters in the original file
-void printNumChar(FILE* readFile, FILE* writeFile)
+long printNumChar(FILE* readFile)
 {
     fseek(readFile, 0, SEEK_SET);
     fseek(readFile, 0, SEEK_END);
     long numChar = ftell(readFile);
-    fwrite(&numChar, sizeof(long), 1, writeFile);
     rewind(readFile);
+    return numChar;
 }
 
 //prints the number of characters that the huffman tree shows
@@ -520,7 +564,7 @@ void printHeaderInfo(FILE* writeFile, Tree* root, int* bits, int* totalBits, int
     else
     {
         *bits = *bits << 1;
-        *bits = *bits + 0x01;
+        *bits = *bits | 0x01;
         *totalBits = *totalBits + 1;
         int j;
         int chr = root -> chr;

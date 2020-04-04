@@ -1,5 +1,5 @@
 GCC = gcc -std=c99 -Wall -Wshadow -Wvla -pedantic -O3 -g
-VAL = valgrind --leak-check=full -s
+VAL = valgrind --leak-check=full
 
 SRCS = pa2.c hcomp.c
 OBJS = $(SRCS:%.c=%.o)
