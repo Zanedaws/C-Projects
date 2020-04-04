@@ -66,12 +66,10 @@ int main(int argc, char** argv)
 
     fclose(fh); //closes the output file
 
-    FILE* writeFile = fopen(argv[5], "w"); //opens output for the compressed output
     FILE* readFile = fopen(argv[1], "r"); //opens the original file
 
-    readToCompress(readFile, writeFile, codeList, rootForest[0], (long)preBuildCount); //reads and compresses the original file
+    readToCompress(readFile, argv[5], codeList, rootForest[0], (long)preBuildCount); //reads and compresses the original file
 
-    fclose(writeFile); //closes the output file
     fclose(readFile); //closes the original file
 
     // print2DUtil(rootForest[0], 0);

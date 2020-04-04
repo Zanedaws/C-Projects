@@ -60,7 +60,7 @@ void printHeader(Tree* root, FILE* fh);
 void printHeaderInfo(FILE* writeFile, Tree* root, int* bits, int* totalBits, int* totalBytesAdded);
 
 //reads a file to compress it to an output writeFile
-void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root, long size);
+void readToCompress(FILE* readFile, char* writeFile, Code** codeList, Tree* root, long size);
 
 //prints the compressed code of the file
 void printCompCode(Code** codeList, char key, FILE* writeFile, int* totalBits, int* bits, long size, long* totalNumChar);

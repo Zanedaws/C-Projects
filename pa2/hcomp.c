@@ -371,14 +371,23 @@ void destroyCodeList(Code** codeList, int size)
 //COMPRESSION CODE---------------------------------------------------------------------------
 
 //reads a file to compress it to an output writeFile
-void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root, long size)
+void readToCompress(FILE* readFile, char* writeName, Code** codeList, Tree* root, long size)
 {
     int totalBits = 0;
     int bits = 0;
     long totalNumChar = 0;
     int totalBytesAdded = 0;
 
-    fseek(writeFile, sizeof(long) * 3, SEEK_SET);
+    FILE* writeFile = fopen(writeName, "w");
+
+    long spacer = 0;
+
+
+    int i = 0;
+    for(i = 0; i < 3; i++)
+        fwrite(&spacer, sizeof(long), 1, writeFile);
+
+    // fseek(writeFile, sizeof(long) * 3, SEEK_SET);
     printHeaderInfo(writeFile, root, &bits, &totalBits, &totalBytesAdded); //prints the tree topology to the file
    
     if(totalBits > 0)
@@ -403,7 +412,8 @@ void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root
     bits = 0;
     totalBits = 0;
 
-    fseek(writeFile, 0, SEEK_END); //goes to the end of file to pring the compressed version of the file
+    fclose(writeFile);
+    writeFile = fopen(writeName, "a"); //goes to the end of file to pring the compressed version of the file
 
 
 
@@ -432,6 +442,8 @@ void readToCompress(FILE* readFile, FILE* writeFile, Code** codeList, Tree* root
 
     totalNumChar += sizeof(long); //adds another long to the total bytes in the compressed file
     fwrite(&totalNumChar, sizeof(long), 1, writeFile); //writes the total bytes in teh compressed file
+
+    fclose(writeFile);
 }
 
 //prints the compressed code of the file
