@@ -407,8 +407,6 @@ void readToCompress(FILE* readFile, char* writeName, Code** codeList, Tree* root
     }
 
     long headerInfoSize = totalBytesAdded;
-
-    fprintf(stderr, "%ld\n", headerInfoSize);
     
     fclose(writeFile);
     writeFile = fopen(writeName, "w");

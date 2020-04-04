@@ -11,7 +11,7 @@ pa2: $(OBJS)
 	$(GCC) -c $*.c
 
 testmemory: pa2
-	$(VAL) --log-file=memcheck1.txt ./pa2 original/gophers freqOutput1 codeOutput1 headerOutput1 compOutput1
+	$(VAL) --log-file=memcheck1.txt ./pa2 original/lorum freqOutput1 codeOutput1 headerOutput1 compOutput1
 
 testall: test1 test2 test3 test4 test5
 	
