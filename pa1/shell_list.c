@@ -1,13 +1,22 @@
 #include "shell_list.h"
 #include <stdlib.h>
 #include <stdio.h>
-Node* addNode(Node* head, long val);
+#include <time.h>
+
+typedef struct _List {
+    Node* head;
+    Node* tail;
+}List;
+
+List* addNode(List* list, long val);
 Node* destroyList(Node* head);
-Node* swapNodes(Node* list, int pos1, int pos2);
+Node* swapNodes(Node* head, int pos1, int pos2);
 Node* getNodeAtIndex(Node* head, long index);
 void printList(Node* head);
 
-Node *addNode(Node* head, long val)
+
+
+List* addNode(List* list, long val)
 {
     //make new node
     Node* newNode = NULL;
@@ -17,20 +26,19 @@ Node *addNode(Node* head, long val)
     // printf("newNode -> value = %ld\n", newNode -> value);
 
     //checks if head is null
-    if(head == NULL)
+    if(list -> head == NULL)
     {
         //if it is then the end of the list is the head
-        head = newNode;
-        return head;
+        list -> head = newNode;
+        list -> tail = newNode;
+        return list;
     }
     else
     {
         //if it isn't p will then find the end of the list and add there
-        Node* p = head;
-        while(p -> next != NULL)
-            p = p -> next;
-        p -> next = newNode;
-        return head;
+        (list -> tail) -> next = newNode;
+        list -> tail = newNode;
+        return list;
     }
 
 }
@@ -64,27 +72,33 @@ Node *List_Load_From_File(char *filename)
         return NULL;
     }
 
-    Node *head = NULL; //initializing the head of the list
+    List *list = malloc(sizeof(*list)); //initializing the head of the list
+    list -> head = NULL;
+    list -> tail = NULL;
 
-    long tmp; //tmp for reading into
+    long tmp = 0; //tmp for reading into
     int read = 0;
 
     while(!feof(fh))
     {
         read += fread(&tmp, sizeof(long), 1, fh); //read a value into tmp
         if(!feof(fh)) //check if EOF has been reached
-            head = addNode(head, tmp); //add value to list
+            list = addNode(list, tmp); //add value to list
     }
 
     if(read == 0)
     {
         fprintf(stderr,"%s","read failed");
-        exit(EXIT_FAILURE);
-        destroyList(head);
+        destroyList(list -> head);
+        free(list);
         return NULL;
     }
 
     fclose(fh); //close the file
+
+    Node* head = list -> head;
+
+    free(list);
 
     return head; //return the new head of the list
 }
@@ -98,7 +112,6 @@ int List_Save_To_File(char* filename, Node* list)
     if(fh == NULL)
     {
         fprintf(stderr,"%s", "fopen in save failed");
-        exit(EXIT_FAILURE);
         return 0;
     }
     
@@ -119,14 +132,16 @@ int List_Save_To_File(char* filename, Node* list)
     return written;
 }
 
-Node *List_Shellsort(Node *list, long *n_comp)
+Node *List_Shellsort(Node *head, long *n_comp)
 {
+    if(head == NULL)
+        return NULL;
 
     //counting the size of the list
-    Node* p = list;
-    long size = 0;
+    Node* p = head;
+    long size = 1;
 
-    while(p != NULL)
+    while(p -> next != NULL)
     {
         p = p -> next;
         size++;
@@ -144,7 +159,6 @@ Node *List_Shellsort(Node *list, long *n_comp)
     } while (h < size);
     h = (h - 1) / 3;
 
-    fprintf(stderr, "sorting internal...\n");
     //shell sort --------------------------------------------------
     
     //variable declarations ---------------------------------------
@@ -158,18 +172,18 @@ Node *List_Shellsort(Node *list, long *n_comp)
     {
         for(j = h; j < size; j++)
         {
-            tmp = getNodeAtIndex(list, j);
+            tmp = getNodeAtIndex(head, j);
             i = j;
-            arrIminH = getNodeAtIndex(list, (i - h));
+            arrIminH = getNodeAtIndex(head, (i - h));
             while(i >= h && arrIminH -> value > tmp -> value)
             {
                 (*n_comp)++; 
 
-                list = swapNodes(list, i - h, i);
+                head = swapNodes(head, i - h, i);
 
                 i = i - h;
                 
-                arrIminH = getNodeAtIndex(list, (i - h));
+                arrIminH = getNodeAtIndex(head, (i - h));
             }
             (*n_comp)++;
         }
@@ -178,9 +192,7 @@ Node *List_Shellsort(Node *list, long *n_comp)
     }
     //shell sort --------------------------------------------------
 
-    fprintf(stderr, "sorted\n");
-
-    return list;
+    return head;
 }
 
 
@@ -191,8 +203,6 @@ Node* getNodeAtIndex(Node* head, long index)
 
     for(i = 0; i < index; i++)
     {   
-        if(node == NULL)
-            fprintf(stderr, "node is null\nindex is = %ld\n", index);
         node = node -> next;
     }
     return node;
@@ -221,7 +231,7 @@ Node* swapNodes(Node* list, int pos1, int pos2)
 
     int i = 0;
 
-    while(tmp != NULL)
+    while(tmp != NULL && (node1 == NULL || node2 == NULL))
     {   
         if(i == pos1 - 1)
             prev1 = tmp;

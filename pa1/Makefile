@@ -15,27 +15,27 @@ pa1: $(OBJS)
 	$(GCC) $(TESTFLAGS) -c $*.c
 
 testmemory: pa1
-	$(VAL) --log-file=memcheck1.txt ./pa1 -l examples/15.b  output1
+	$(VAL) --log-file=memcheck1.txt ./pa1 -l examples/15.b  output1 2>errlog
 
 test1: pa1
-	./pa1 -a examples/100K.b output1a
+	./pa1 -a examples/1M.b output1a
 
 test2: pa1
-	./pa1 -l examples/15.b output1l
+	./pa1 -l examples/15.b output1l 2>errlog
 	diff output1l examples/15sl.b
 
 test3: pa1
-	./pa1 -l examples/1K.b output2l
+	./pa1 -l examples/1K.b output2l 2>errlog
 	diff output2l examples/1Ksl.b
 
 test4: pa1
-	./pa1 -l examples/10K.b output3l
+	./pa1 -l examples/10K.b output3l 2>errlog
 
 test5: pa1
-	./pa1 -l examples/100K.b output4l
+	./pa1 -l examples/100K.b output4l 2>errlog
 	
 test6: pa1
-	./pa1 -l examples/1M.b output5l
+	./pa1 -l examples/1M.b output5l 2>errlog
 
 clean: # remove all machine generated files
 	rm -f *.o output??

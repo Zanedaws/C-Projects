@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 int main(int argc, char *argv[])
 {
@@ -29,9 +30,11 @@ int main(int argc, char *argv[])
     long n_comp = 0;
 
 
-  
+    clock_t begin = clock();
     Array_Shellsort(array, size, &n_comp);
-
+    clock_t end = clock();
+    double timeSpend = (double)(end - begin) / CLOCKS_PER_SEC;
+    fprintf(stderr ,"list sorted in: %fs\n", timeSpend);
 
     int writ = 0;
 
@@ -49,8 +52,11 @@ int main(int argc, char *argv[])
   if(!strcmp(argv[1], "-l"))
   {
     Node* head = NULL;
+    clock_t begin = clock();
     head = List_Load_From_File(argv[2]);
-    fprintf(stderr, "list loaded\n");
+    clock_t end = clock();
+    double timeSpend = (double)(end - begin) / CLOCKS_PER_SEC;
+    fprintf(stderr, "list loaded in: %fs\n", timeSpend);
     long n_comp = 0;
 
     int size = 0;
@@ -64,8 +70,11 @@ int main(int argc, char *argv[])
       size++;
     }
     fprintf(stderr, "sorting...\n");
+    begin = clock();
     head = List_Shellsort(head, &n_comp);
-    fprintf(stderr, "sorted\n");
+    end = clock();
+    timeSpend = (double)(end - begin) / CLOCKS_PER_SEC;
+    fprintf(stderr, "sorted in: %fs\n", timeSpend);
 
     int writ;
 
