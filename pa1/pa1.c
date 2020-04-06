@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
   {
     Node* head = NULL;
     head = List_Load_From_File(argv[2]);
-
+    fprintf(stderr, "list loaded\n");
     long n_comp = 0;
 
     int size = 0;
@@ -58,25 +58,20 @@ int main(int argc, char *argv[])
 
     p = head;
 
-    while(p -> next != NULL)
+    while(p != NULL)
     {
       p = p -> next;
       size++;
     }
-
+    fprintf(stderr, "sorting...\n");
     head = List_Shellsort(head, &n_comp);
-
-    fprintf(stderr, "%s", "past shell sort\n");
+    fprintf(stderr, "sorted\n");
 
     int writ;
 
-    int k = 0;
-    Node* q = head;
-    fprintf(stderr, "%ld\n", q -> value);
-    q = q -> next;
-    fprintf(stderr, "%ld\n", q -> value);
-
+    fprintf(stderr, "saving\n");
     writ = List_Save_To_File(argv[3], head);
+    fprintf(stderr, "saved\n");
 
     if(writ != size)
     {
@@ -87,7 +82,6 @@ int main(int argc, char *argv[])
 
     printf("%ld\n", n_comp);
   }
-
 
   return 0;
 }

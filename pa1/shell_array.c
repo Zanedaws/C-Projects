@@ -9,7 +9,7 @@ long *Array_Load_From_File(char *filename, int *size)
   FILE *fh = fopen(filename, "r");
   if (fh == NULL)
   {
-    fclose(fh);
+    fprintf(stderr, "failed to open file properly\n");
     return NULL;
   }
 
@@ -102,9 +102,10 @@ void Array_Shellsort(long *array, int size, long *n_comp)
       i = j;
       while (i >= h && array[i-h] > tmp)
       {
-        (*n_comp)++;
+        (*n_comp)++; //increment number of comparisons
+        //swap the first node and the second
         array[i] = array[i-h];
-        i = i - h;
+        i = i - h; //shift i back to the first node in the list
         array[i] = tmp;
       }
       (*n_comp)++;

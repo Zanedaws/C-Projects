@@ -1,7 +1,7 @@
 WARNING = -Wall -Wshadow --pedantic
 ERROR = -Wvla
-GCC = gcc -O3 -std=c99 $(WARNING) $(ERROR)
-VAL = valgrind --tool=memcheck --leak-check=full --verbose --show-leak-kinds=all --track-origins=yes
+GCC = gcc -g -O3 -std=c99 $(WARNING) $(ERROR)
+VAL = valgrind --leak-check=full --leak-check=full --show-leak-kinds=all --track-origins=yes
 
 TESTFLAGS = 
 
@@ -16,18 +16,29 @@ pa1: $(OBJS)
 
 testmemory: pa1
 	$(VAL) --log-file=memcheck1.txt ./pa1 -l examples/15.b  output1
-	code memcheck1.txt
 
 test1: pa1
-	./pa1 -a examples/1K.b output1a
-	diff output1a examples/1Ksa.b
+	./pa1 -a examples/100K.b output1a
 
 test2: pa1
 	./pa1 -l examples/15.b output1l
-	diff output1l examples/15sa.b
+	diff output1l examples/15sl.b
+
+test3: pa1
+	./pa1 -l examples/1K.b output2l
+	diff output2l examples/1Ksl.b
+
+test4: pa1
+	./pa1 -l examples/10K.b output3l
+
+test5: pa1
+	./pa1 -l examples/100K.b output4l
 	
+test6: pa1
+	./pa1 -l examples/1M.b output5l
+
 clean: # remove all machine generated files
-	rm -f *.o output?
+	rm -f *.o output??
 	
 zip:
 	zip pa1.zip pa1.c shell_array.c shell_list.c

@@ -3,13 +3,15 @@
 #include <stdio.h>
 Node* addNode(Node* head, long val);
 Node* destroyList(Node* head);
-Node* swapNodes(Node* head, Node* n1, Node* n2);
+Node* swapNodes(Node* list, int pos1, int pos2);
+Node* getNodeAtIndex(Node* head, long index);
+void printList(Node* head);
 
 Node *addNode(Node* head, long val)
 {
     //make new node
     Node* newNode = NULL;
-    newNode = malloc(sizeof(Node));
+    newNode = malloc(sizeof(*newNode));
     newNode -> value = val;
     newNode -> next = NULL;
     // printf("newNode -> value = %ld\n", newNode -> value);
@@ -52,59 +54,10 @@ Node* destroyList(Node* head)
 }
 
 
-Node* swapNodes(Node* head, Node* n1, Node* n2)
-{
-    Node * p = head;
-    Node * q = head;
-    
-    fprintf(stderr, "head = %ld\n", head -> value);
-    fprintf(stderr, "n1 = %ld\n", n1 -> value);
-    fprintf(stderr, "n2 = %ld\n", n2 -> value);
-
-    fprintf(stderr, "n1 == head: %d\n", n1 == head);
-
-    if(n1 != head)
-    {
-        //p finds previous of n1
-        while(p -> next != n1)
-        {
-            p = p -> next;
-        }
-
-        if(n2 != head)
-        {
-            //q finds previous of n2
-            while(q -> next != n2)
-            {
-                q = q -> next;
-            }
-
-            Node * tmp = n1 -> next;
-            n1 -> next = n2 -> next;
-            n2 -> next = tmp;
-            p -> next = n2;
-            q -> next = n1;
-            return head;
-        }
-        else if (n2 == head)
-        {
-            Node * tmp = n1 -> next;
-            n1 -> next = n2 -> next;
-            n2 -> next = tmp;
-            p -> next = n2;
-            head = n1;
-            return head;
-        }
-        
-    }
-    
-    return head;
-}
-
 Node *List_Load_From_File(char *filename)
 {
     //opening file
-    FILE *fh = fopen(filename, "r");
+    FILE *fh = fopen(filename, "rb");
     if(fh == NULL)
     {
         fprintf(stderr, "%s", "file didn't load properly\n");
@@ -151,14 +104,17 @@ int List_Save_To_File(char* filename, Node* list)
     
 
     Node *p = list;
-    int written;
+    int written = 0;
 
     while(p != NULL)
     {
-        fwrite(&(p -> value), sizeof(long), 1, fh);
+        written += fwrite(&(p -> value), sizeof(long), 1, fh);
         p = p -> next;
-        written++;
     }
+
+    fclose(fh);
+
+    destroyList(list);
 
     return written;
 }
@@ -170,11 +126,12 @@ Node *List_Shellsort(Node *list, long *n_comp)
     Node* p = list;
     long size = 0;
 
-    while(p -> next != NULL)
+    while(p != NULL)
     {
         p = p -> next;
         size++;
     }
+
 
     long h = 0; //sequence value
 
@@ -187,107 +144,134 @@ Node *List_Shellsort(Node *list, long *n_comp)
     } while (h < size);
     h = (h - 1) / 3;
 
-    //increment variables
+    fprintf(stderr, "sorting internal...\n");
+    //shell sort --------------------------------------------------
+    
+    //variable declarations ---------------------------------------
     long j;
     long i;
-    long k = 0;
-
-    //
-    Node* arrIminH = list;
+    Node* arrIminH = NULL;
     Node* tmp = NULL;
-    Node* arrI = list;
+    //variable declarations ---------------------------------------
 
-    //shell sort --------------------------------------------------
-    while (h > 0)
+    while(h > 0)
     {
-        for (j = h; j < size; j++)
+        for(j = h; j < size; j++)
         {
-            tmp = list;
-            while(k != j)
-            {
-                tmp = tmp -> next;
-                k++;
-            }
-            k = 0;
-
+            tmp = getNodeAtIndex(list, j);
             i = j;
-            
-            arrIminH = list;
-            while(k != i - h)
+            arrIminH = getNodeAtIndex(list, (i - h));
+            while(i >= h && arrIminH -> value > tmp -> value)
             {
-                arrIminH = arrIminH -> next;
-                k++; 
-            }
-            k = 0;
+                (*n_comp)++; 
 
-            while (i >= h && arrIminH -> value > tmp -> value)
-            {
-                (*n_comp)++;
-
-                arrIminH = list;
-                while(k != i - h)
-                {
-                    arrIminH = arrIminH -> next;
-                    k++; 
-                }
-                k = 0;
-
-                arrI = list;
-
-                while(k != i)
-                {
-                    arrI = arrI -> next;
-                    k++;
-                }
-                k = 0;
-
-                fprintf(stderr, "here\n");
-
-                Node * preArrI = list;
-                while(preArrI != arrI && preArrI -> next != arrI);
-                    preArrI = preArrI -> next;
-
-                fprintf(stderr, "here\n");
-
-                Node * preArrIH = list;
-                while(preArrIH != arrIminH && preArrIH -> next != arrIminH)
-                    preArrIH = preArrIH -> next;
-
-                Node* pstArrI = arrI -> next;
-
-                arrI -> next = arrIminH -> next;
-                preArrI -> next = arrIminH;
-                arrIminH -> next = pstArrI;
-                preArrIH -> next = arrI;
-
-                fprintf(stderr, "here\n");
+                list = swapNodes(list, i - h, i);
 
                 i = i - h;
-
-
-                preArrI = list;
-                while(preArrI != arrI && preArrI -> next != arrI);
-                    preArrI = preArrI -> next;
-
-                preArrIH = list;
-                while(preArrIH != tmp && preArrIH -> next != tmp)
-                    preArrIH = preArrIH -> next;
-
-                pstArrI = arrI -> next;
-
-                arrI -> next = tmp -> next;
-                preArrI -> next = tmp;
-                tmp -> next = pstArrI;
-                preArrIH -> next = arrI;
-            
+                
+                arrIminH = getNodeAtIndex(list, (i - h));
             }
-            (*n_comp)++; //increment number of comparisons
+            (*n_comp)++;
         }
-        //decrement sequence
+
         h = (h - 1) / 3;
     }
     //shell sort --------------------------------------------------
 
+    fprintf(stderr, "sorted\n");
+
+    return list;
+}
+
+
+Node* getNodeAtIndex(Node* head, long index)
+{
+    Node* node = head;
+    int i;
+
+    for(i = 0; i < index; i++)
+    {   
+        if(node == NULL)
+            fprintf(stderr, "node is null\nindex is = %ld\n", index);
+        node = node -> next;
+    }
+    return node;
+}
+
+
+Node* swapNodes(Node* list, int pos1, int pos2)
+{
+
+    if(pos1 == pos2)
+        return list;
+    
+
+    if ((pos1 < 0) || (pos2 < 0))
+    {
+        fprintf(stderr, "\tinvalid position args in swapNodes\n");
+        return list;
+    }
+
+    Node* node1 = NULL;
+    Node* node2 = NULL;
+    Node* prev1 = NULL;
+    Node* prev2 = NULL;
+
+    Node* tmp = list;
+
+    int i = 0;
+
+    while(tmp != NULL)
+    {   
+        if(i == pos1 - 1)
+            prev1 = tmp;
+        if(i == pos2 - 1)
+            prev2 = tmp;
+        if(i == pos1)
+            node1 = tmp;
+        if(i == pos2)
+            node2 = tmp;
+        tmp = tmp -> next;
+        i++;
+    }
+
+    if(node1 != NULL && node2 != NULL)
+    {   
+        if(prev1 != NULL)
+            prev1 -> next = node2;
+        
+        if(prev2 != NULL)
+            prev2 -> next = node1;
+
+        tmp = node1 -> next;
+        node1 -> next = node2 -> next;
+        node2 -> next = tmp;
+
+        if(prev1 == NULL)
+        {
+            list = node2;
+        }
+        else if(prev2 == NULL)
+        {
+            list = node1;
+        }
+    }
+
     return list;
 
+}
+
+void printList(Node* head)
+{
+    Node* p = head;
+    while(p != NULL)
+    {
+        fprintf(stderr, "%ld\n", p -> value);
+        p = p -> next;
+    }
+
+    if(p == NULL)
+        fprintf(stderr, "null reached\n");
+
+    return;
 }
