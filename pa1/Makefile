@@ -15,7 +15,7 @@ pa1: $(OBJS)
 	$(GCC) $(TESTFLAGS) -c $*.c
 
 testmemory: pa1
-	$(VAL) --log-file=memcheck1.txt ./pa1 -l examples/15.b  output1 2>errlog
+	$(VAL) --log-file=memcheck1.txt ./pa1 -l examples/10K.b  output1 2>errlog
 
 test1: pa1
 	./pa1 -a examples/1M.b output1a
@@ -38,7 +38,7 @@ test6: pa1
 	./pa1 -l examples/1M.b output5l 2>errlog
 
 clean: # remove all machine generated files
-	rm -f *.o output??
+	rm -f *.o output?? errlog
 	
 zip:
 	zip pa1.zip pa1.c shell_array.c shell_list.c

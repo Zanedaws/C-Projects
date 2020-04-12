@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    printf("%ld\n", n_comp);
+    fprintf(stdout, "%ld\n", n_comp);
   }
 
   return 0;
