@@ -21,7 +21,10 @@ int main(int argc, char** argv)
         int size = 0;
         long* array = Array_Load_From_File(argv[2], &size);
 
+        fprintf(stderr, "size = %d\n", size);
+        printArray(array, size);
         Quick_Sort(array, size);
+        printArray(array, size);
 
         int written = Array_Save_To_File(argv[3], array, size);
         if(written != size){

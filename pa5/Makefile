@@ -11,7 +11,7 @@ pa5: $(OBJS)
 	$(GCC) -c $*.c
 
 testmemory: pa5
-	$(VAL) --log-file=memcheck0.txt ./pa5 -q 5.b output1
+	$(VAL) --log-file=memcheck0.txt ./pa5 -q 7.b output1
 	# $(VAL) --log-file=memcheck1.txt ./pa5 -b examples/ops1.b treeOutput1
 	# $(VAL) --log-file=memcheck2.txt ./pa5 -b examples/ops2.b treeOutput1
 	# $(VAL) --log-file=memcheck3.txt ./pa5 -b examples/ops3.b treeOutput1
