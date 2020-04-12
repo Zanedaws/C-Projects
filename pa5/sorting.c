@@ -2,13 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define M 9
+
 long *Array_Load_From_File(char *filename, int *size);
 int Array_Save_To_File(char *filename, long *array, int size);
+
 void medianQuick(long* array, int start, int end);
 int Partition(long* array, int start, int end);
-long median(long x, long y, long z);
 void swap(long* a, long* b);
 void compSwap(long* a, long* b);
+void insertionSort(long* array, int start, int end);
 
 long *Array_Load_From_File(char *filename, int *size)
 {
@@ -84,12 +87,46 @@ int Array_Save_To_File(char *filename, long *array, int size)
 void Quick_Sort(long* Array, int Size)
 {
     medianQuick(Array, 0, Size - 1);
+    insertionSort(Array, 0, Size - 1);
     return;
+}
+
+void insertionSort(long* array, int start, int end)
+{
+
+    int i;
+    for( i = start + 1; i <= end; i++)
+        compSwap(&array[start], &array[i]);
+    for(i = start + 2; i <= end; i++)
+    {
+        int j = i;
+        long v = array [i];
+        while(v < array[j - 1])
+        {
+            array[j] = array[j-1];
+            j--;
+        }
+        array[j] = v;
+    }
+
+    // int i, key, j; 
+    // for (i = 1; i < size; i++) 
+    // { 
+    //     key = array[i]; 
+    //     j = i - 1; 
+
+    //     while (j >= 0 && array[j] > key) { 
+    //         array[j + 1] = array[j]; 
+    //         j = j - 1; 
+    //     } 
+    //     array[j + 1] = key; 
+    // } 
+
 }
 
 void medianQuick(long* array, int start, int end)
 {   
-    if(start >= end)
+    if(start >= end || end - 1 <= M)
         return;
     
     int i;
@@ -175,12 +212,3 @@ void swap(long* a, long* b)
     (*b) = tmp;
 }
 
-long median(long x, long y, long z)
-{
-    if((x < y) != (x < z))
-        return x;
-    else if((y < x) != (y < z))
-        return y;
-    else
-        return z;
-}
