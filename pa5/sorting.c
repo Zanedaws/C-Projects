@@ -108,25 +108,11 @@ void insertionSort(long* array, int start, int end)
         }
         array[j] = v;
     }
-
-    // int i, key, j; 
-    // for (i = 1; i < size; i++) 
-    // { 
-    //     key = array[i]; 
-    //     j = i - 1; 
-
-    //     while (j >= 0 && array[j] > key) { 
-    //         array[j + 1] = array[j]; 
-    //         j = j - 1; 
-    //     } 
-    //     array[j + 1] = key; 
-    // } 
-
 }
 
 void medianQuick(long* array, int start, int end)
 {   
-    if(start >= end || end - 1 <= M)
+    if(end - start <= M)
         return;
     
     int i;
@@ -139,14 +125,6 @@ void medianQuick(long* array, int start, int end)
     i = Partition(array, start, end);
     medianQuick(array, start, i - 1);
     medianQuick(array, i + 1, end);
-
-    // int med;
-    // if(start < end)
-    // {
-    //     med = Partition(array, start, end);
-    //     medianQuick(array,start, med - 1);
-    //     medianQuick(array,med + 1, end);
-    // }
 }
 
 void compSwap(long* a, long* b)
@@ -159,29 +137,6 @@ void compSwap(long* a, long* b)
 //returns the median index after sorting the partitions
 int Partition(long* array, int start, int end)
 {
-
-    // long pivot = array[end];
-
-    // long tmp;
-
-    // int i = start - 1;
-
-    // int j;
-    // for(j = start; j <= end; j++)
-    // {
-    //     if(array[j] < pivot)
-    //     {
-    //         i++;
-    //         tmp = array[j];
-    //         array[j] = array[i];
-    //         array[i] = tmp;
-    //     }
-    // }
-    // tmp = array[i + 1];
-    // array[i + 1] = array[end];
-    // array[end] = tmp;
-    // return i + 1;
-
     int i = start;
     int j = end - 1;
     long v = array[end];
@@ -212,3 +167,8 @@ void swap(long* a, long* b)
     (*b) = tmp;
 }
 
+
+void Merge_Sort(long* Array, int Size)
+{
+
+}
