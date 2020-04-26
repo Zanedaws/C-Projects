@@ -42,12 +42,13 @@ void getBalance(Tnode* root, int* balanceScore)
     int rightHeight = getHeight(root -> right);
 
     int balance = leftHeight - rightHeight;
-    fprintf(stderr, "balance\n");
     root -> balance = balance;
     if(balance > 1 || balance < -1)
     {
         *balanceScore = 0;
     }
+    getBalance(root -> left, balanceScore);
+    getBalance(root -> right, balanceScore);
     return;
 }
 
