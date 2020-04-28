@@ -106,18 +106,18 @@ Tnode* deleteKey(Tnode* root, int keyDelete)
 	{
 		if(root -> balance < -1)
 		{
-			if(root -> left != NULL)
-				if((root -> left) -> balance > 0)
-					root -> left = clkRot(root -> left);
+			if(root -> right != NULL)
+				if((root -> right) -> balance > 0)
+					root -> right = clkRot(root -> right);
 			root = cntClkRot(root);
 			return root;
 		}
 
 		if(root -> balance > 1)
 		{
-			if(root -> right != NULL)
-				if((root -> right) -> balance < 0)
-					root -> right = cntClkRot(root -> right);
+			if(root -> left != NULL)
+				if((root -> left) -> balance < 0)
+					root -> left = cntClkRot(root -> left);
 			root = clkRot(root);
 			return root;
 		}
