@@ -4,189 +4,184 @@
 #include "build.h"
 
 //inserts a key into the BST and balances it
-Tnode* insertKey(Tnode* root, Tnode* previous, int toInsert)
-{   
-    if(root == NULL)
-    {
-        Tnode* newRoot = malloc(sizeof(*newRoot));
-        newRoot -> balance = 0;
-        newRoot -> key = toInsert;
-        newRoot -> left = NULL;
-        newRoot -> right = NULL;
-        return newRoot;
-    }
-        
-    if(toInsert > root -> key)
-    {
-        fprintf(stderr, "\n");
-        root -> right = insertKey(root -> right, root, toInsert);
-        getBalanceNS(root);
-        if(root -> balance < -1 || root -> balance > 1)
-        {
-            root = balance(root, previous);
-        }
-        return root;
-    }
-    if(toInsert <= root -> key)
-    {
-        fprintf(stderr, "\n");
-        root -> left = insertKey(root -> left, root, toInsert);
-        getBalanceNS(root);
-        if(root -> balance < -1 || root -> balance > 1)
-        {
+Tnode* insertKey(Tnode* root, int toInsert)
+{
 
-            root = balance(root, previous);
+	if(root == NULL)
+	{
+		Tnode* newNode = malloc(sizeof(*newNode));
+		newNode -> key = toInsert;
+		newNode -> left = NULL;
+		newNode -> right = NULL;
+		newNode -> balance = 0;
+		return newNode;
+	}
+	if(toInsert <= root -> key)
+	{
+		root -> left = insertKey(root->left, toInsert);
+	}
+	else if(toInsert > root -> key)
+	{
+		root -> right = insertKey(root->right, toInsert);
+	}
+	else
+		return root;
+	
+	getBalanceNS(root);
+	
+	if(root -> balance < -1 || root -> balance > 1)
+	{
+		if(root -> balance < -1)
+		{
+			if(root -> right != NULL)
+				if((root -> right) -> balance > 0)
+					root -> right = clkRot(root -> right);
+			root = cntClkRot(root);
+		}
 
-        }
-        return root;
-    }
+		else if(root -> balance > 1)
+		{
+			if(root -> left != NULL)
+				if((root -> left) -> balance < 0)
+					root -> left = cntClkRot(root -> left);
+			root = clkRot(root);
+		}
+	}
 
-    // fprintf(stderr, "something odd happened\n");
 
-    return NULL;
+	return root;
 }
 
+
 //deletes key from the BST and balances it
-Tnode* deleteKey(Tnode* root, Tnode* previous, int keyDelete)
+Tnode* deleteKey(Tnode* root, int keyDelete)
 {
-    if(root == NULL)
-        return NULL;
-    
-    if(keyDelete < root -> key)
-    {
-        root -> left = deleteKey(root -> left, root, keyDelete);
-        getBalanceNS(root);
-        root = balance(root, previous);
-    }
-    else if(keyDelete > root -> key)
-    {
-        root -> right = deleteKey(root -> right, root, keyDelete);
-        getBalanceNS(root);
-        root = balance(root, previous);
-    }
-    else
-    {
-        if(root -> left == NULL)
-        {
-            Tnode* temp = root -> right;
-            free(root);
-            return temp;
-        }
-        else if(root -> right == NULL)
-        {
-            Tnode* temp = root -> left;
-            free(root);
-            return temp;
-        }
-    
+	if(root == NULL)
+		return root;
+	
+	
+	if(keyDelete > root -> key)
+		root -> right = deleteKey(root -> right, keyDelete);
+	
+	else if(keyDelete < root -> key)
+		root -> left = deleteKey(root -> left, keyDelete);
+	
+	else
+	{
+		if(root -> left == NULL && root -> right == NULL)
+		{
+			free(root);
+			return NULL;
+		}
+		if(root -> right == NULL)
+		{	
+			Tnode* tmp = root -> left;
+			free(root);
+			return tmp;
+		}
+		if(root -> left == NULL)
+		{
+			Tnode* tmp = root -> right;
+			free(root);
+			return tmp;
+		}
+		if(root -> left != NULL && root -> right != NULL)
+		{
+			Tnode* pred = getPred(root -> left);
+			int tmp = pred -> key;
+			pred -> key = root -> key;
+			root -> key = tmp;
+			root -> left = deleteKey(root -> left, keyDelete);
+		}
+	}
 
-        Tnode* temp = getPred(root -> left);
-        
-        root -> key = temp -> key;
 
-        root -> left = deleteKey(root -> left, previous, temp -> key);
-        getBalanceNS(root);
-        root = balance(root, previous);
-    }
-    getBalanceNS(root);
-    root = balance(root, previous);
-    return root;
+
+	if(root == NULL)
+		return root;
+	
+	getBalanceNS(root);
+	
+	if(root -> balance < -1 || root -> balance > 1)
+	{
+		if(root -> balance < -1)
+		{
+			if(root -> left != NULL)
+				if((root -> left) -> balance > 0)
+					root -> left = clkRot(root -> left);
+			root = cntClkRot(root);
+			return root;
+		}
+
+		if(root -> balance > 1)
+		{
+			if(root -> right != NULL)
+				if((root -> right) -> balance < 0)
+					root -> right = cntClkRot(root -> right);
+			root = clkRot(root);
+			return root;
+		}
+	}
+	return root;
 }
 
 //gets inorder predecessor
 Tnode* getPred(Tnode* root)
-{
+{	
     while(root -> right != NULL)
-    {
+    {	
         root = root -> right;
     }
-    return root;
+	return root;
 }
 
 //balances tree at given root node
 Tnode* balance(Tnode* root, Tnode* previous)
 {
-    printTree(root);
- fprintf(stderr, "\n");
     if(root -> balance > 1)
     {
 
-        root = clkRot(root, previous);
+        root = clkRot(root);
     }
     else if(root -> balance < -1)
     {
 
-        root = cntClkRot(root, previous);
+        root = cntClkRot(root);
 
     }
-    printTree(root);
-    fprintf(stderr, "\n");
     return root;
 }
 
 //performs a clockwise rotation at given root node
-Tnode* clkRot(Tnode* root, Tnode* previous)
+Tnode* clkRot(Tnode* root)
 {
-    Tnode* newRoot;
-    if((root -> left) -> balance < 0)
-    {
-        newRoot = (root -> left) -> right;
-        Tnode* temp = root -> left;
-        root -> left = newRoot;
-        temp -> right = newRoot -> left;
-        newRoot -> left = temp;
-        getBalanceNS(newRoot);
-        getBalanceNS(temp);
-    }
-    newRoot = root -> left;
 
-    root -> left = newRoot -> right;
-    newRoot -> right = root;
-    if(previous != NULL)
-    {
-        if(previous -> right == root)
-            previous -> right = newRoot;
-        else
-            previous -> left = newRoot;
-    }
+	Tnode* p = root -> left;
+	Tnode* q = p -> right;
 
-    getBalanceNS(root);
-    getBalanceNS(newRoot);
+	p -> right = root;
+	root -> left = q;
 
-    return newRoot;
+	getBalanceNS(p);
+	getBalanceNS(root);
+
+	return p;
 }
 
 //performs a counter clockwise rotation at given root node
-Tnode* cntClkRot(Tnode* root, Tnode* previous)
+Tnode* cntClkRot(Tnode* root)
 {
-    Tnode* newRoot;
-    if((root -> right) -> balance > 0)
-    {
-        newRoot = (root -> right) -> left;
-        Tnode* temp = root -> right;
-        root -> right = newRoot;
-        temp -> left = newRoot -> right;
-        newRoot -> right = temp;
-        getBalanceNS(newRoot);
-        getBalanceNS(temp);
-    }
 
-    newRoot = root -> right;
-    root -> right = newRoot -> left;
-    newRoot -> left = root;
+	Tnode* p = root -> right;
+	Tnode* q = p -> left;
 
-    if(previous != NULL)
-    {
-        if(previous -> right == root)
-            previous -> right = newRoot;
-        else
-            previous -> left = newRoot;
-    }
+	p -> left = root;
+	root -> right = q;
 
-    root -> balance = root -> balance + 2;
-    newRoot -> balance = newRoot -> balance + 1;
-    
-    return newRoot;
+	getBalanceNS(root);
+	getBalanceNS(p);
+
+	return p;
 }
 
 

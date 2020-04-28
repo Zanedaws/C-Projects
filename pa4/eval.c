@@ -99,3 +99,15 @@ void bstEval(Tnode* root, int* bstScore)
     bstEval(root -> right, bstScore);
     return;
 }
+
+void updateBals(Tnode* root)
+{
+	if(root == NULL)
+		return;
+	
+	getBalanceNS(root);
+	updateBals(root -> left);
+	updateBals(root -> right);
+	
+	return;
+}

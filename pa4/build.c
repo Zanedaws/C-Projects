@@ -73,20 +73,19 @@ int buildFromOps(FILE* fh, Tnode* root, char* outputFile)
                 
                 if(op == 'i')
                 {
-                    Tnode* previous = NULL;
+                    //Tnode* previous = NULL;
                     fprintf(stderr, "\ninsert: %d\n", key);
-                    root = insertKey(root, previous, key);
+                    root = insertKey(root, key);
                     fprintf(stderr, "post insertKey call\n");
-                    printTree(root);
+                   	printTree(root);
                     fprintf(stderr, "\n");
                 }
                 if(op == 'd')
                 {
-                    Tnode* previous = NULL;
                     fprintf(stderr, "pre deleteKey call: %d\n", key);
                     printTree(root);
                     fprintf(stderr, "\n");
-                    root = deleteKey(root, previous, key);
+                    root = deleteKey(root, key);
                     fprintf(stderr, "post deleteKey call\n");
                     printTree(root);
                     fprintf(stderr, "\n");

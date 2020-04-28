@@ -1,0 +1,14 @@
+==24666== Memcheck, a memory error detector
+==24666== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==24666== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==24666== Command: ./pa4 -b examples/ops3.b treeOutput3
+==24666== Parent PID: 24665
+==24666== 
+==24666== 
+==24666== HEAP SUMMARY:
+==24666==     in use at exit: 0 bytes in 0 blocks
+==24666==   total heap usage: 30 allocs, 30 frees, 10,792 bytes allocated
+==24666== 
+==24666== All heap blocks were freed -- no leaks are possible
+==24666== 
+==24666== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
