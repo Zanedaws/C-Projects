@@ -89,11 +89,17 @@ void bstEval(Tnode* root, int* bstScore)
     }
     if(root -> left != NULL)
     {
-        *bstScore = (root -> left) -> key <= root -> key ? (*bstScore) : 0; 
+        if(root -> left -> key > root -> key)
+		{
+			*bstScore = 0;
+		}
     }
     if(root -> right != NULL)
     {
-        *bstScore = (root -> right) -> key > root -> key ? (*bstScore) : 0;
+		if(root -> right -> key <= root -> key)
+		{
+			*bstScore = 0;
+		}
     }
     bstEval(root -> left, bstScore);
     bstEval(root -> right, bstScore);
