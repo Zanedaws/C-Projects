@@ -45,6 +45,3 @@ clean: # remove all machine generated files
 	
 zip:
 	zip pa2.zip *.c *.h Makefile
-
-update:
-	git push -u https://Zanedaws:40002608Zanefunk@github.com/Zanedaws/ECE368.git master
